@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import { StyleSheet, Text, View, Pressable, Animated, SafeAreaView, ScrollView} from 'react-native'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Audio } from 'expo-av'
 import styled from 'styled-components/native'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -10,6 +10,34 @@ export default function App() {
   const [recording, setRecording] = useState()
   const [recordings, setRecordings] = useState([])
   const [message, setMessage] = useState('')
+  const borderRadius = useRef(new Animated.Value(50)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (recording) {
+      Animated.timing(scale, {
+        toValue: 0.6,
+        duration: 200,
+        useNativeDriver: true
+      }).start()
+      Animated.timing(borderRadius, {
+        toValue: 10,
+        duration: 200,
+        useNativeDriver: true
+      }).start()
+    } else {
+      Animated.timing(scale, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true
+      }).start()
+      Animated.timing(borderRadius, {
+        toValue: 50,
+        duration: 200,
+        useNativeDriver: true
+      }).start()
+    }
+  }, [recording])
 
   const startRecording = async () => {
     try {
@@ -109,7 +137,7 @@ export default function App() {
       </SafeAreaView>
       <ControlPanel>
         <RecordButtonOutline />
-        <RecordButton 
+        <RecordButton as={Animated.TouchableOpacity} style={{ borderRadius, transform: [ { scale }]}}
           activeOpacity={.7}
           onPress={recording ? stopRecording : startRecording }
           recording={recording}
@@ -157,9 +185,9 @@ const RecordButton = styled.TouchableOpacity`
   position: absolute;
   background-color: #bb0000;
   transition: 1ms ease-in-out;
-  height: ${({ recording }) => (recording ? '40px' : '60px')};
-  width: ${({ recording }) => (recording ? '40px' : '60px')};
-  border-radius: ${({ recording }) => (recording ? '10px' : '999px')};
+  height: 60px;
+  width: 60px;
+  border-radius: 999px;
 
 
 
