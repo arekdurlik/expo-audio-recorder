@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "react-native-audio-recorder",
-    "slug": "react-native-audio-recorder",
+    "name": "expo-audio-recorder",
+    "slug": "expo-audio-recorder",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
