@@ -1,7 +1,7 @@
-import { StatusBar } from 'expo-status-bar'
-import { StyleSheet, Text, View, Pressable, Animated, SafeAreaView, ScrollView} from 'react-native'
+import { StyleSheet, Modal, StatusBar, Text, View, Pressable, Animated, SafeAreaView, ScrollView} from 'react-native'
 import { useState, useRef, useEffect } from 'react'
 import { Audio } from 'expo-av'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import styled from 'styled-components/native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import Slider from '@react-native-community/slider'
@@ -9,9 +9,30 @@ import Slider from '@react-native-community/slider'
 export default function App() {
   const [recording, setRecording] = useState()
   const [recordings, setRecordings] = useState([])
+  const [uriList, setUriList] = useState([])
   const [message, setMessage] = useState('')
-  const borderRadius = useRef(new Animated.Value(50)).current;
-  const scale = useRef(new Animated.Value(1)).current;
+  const [modalVisible, setModalVisible] = useState(false)
+  const borderRadius = useRef(new Animated.Value(50)).current
+  const scale = useRef(new Animated.Value(1)).current
+
+  const getRecordings = async () => {
+    try {
+      const value = await AsyncStorage.getItem('recordings')
+      if(value !== null) {
+        const data = await JSON.parse(value)
+        setRecordings(data)
+      }
+    } catch(e) {
+    }
+  }
+
+  useEffect(() => {
+      getRecordings()
+  }, [])
+
+  useEffect(() => {
+    console.log('recs: ',  recordings)
+  }, [recordings])
 
   useEffect(() => {
     if (recording) {
@@ -69,18 +90,18 @@ export default function App() {
       console.log('recording err', err)
     }
 
-    let updatedRecordings = [...recordings]
     const { sound, status } = await recording.createNewLoadedSoundAsync()
 
-    updatedRecordings.push({
+    console.log('recording saved at: ' + recording.getURI())
+
+    const newRecordings = [...recordings, {
       sound: sound,
-      duration: getDurationFormatted(status.durationMillis),
-      file: recording.getURI()
-    })
+      duration: status.durationMillis
+    }]
 
-    console.log(recording.getURI())
+    await AsyncStorage.setItem('recordings', JSON.stringify(newRecordings))
 
-    setRecordings(updatedRecordings)
+    setRecordings(newRecordings)
   }
 
   const getDurationFormatted = (millis) => {
@@ -93,55 +114,94 @@ export default function App() {
   }
 
   const getRecordingLines = () => {
-    return recordings.map((recordingLine, index) => {
+    return recordings.map((rec, index) => {
       return (
         <Recording 
           key={index} 
-          style={styles.row}>
-            <RecordingTitle>Recording {index + 1} - {recordingLine.duration}</RecordingTitle>
-            
-            <Button 
-              activeOpacity={.7}
-              onPress={() => recordingLine.sound.replayAsync()}
-            >
-              <Ionicons name="md-play" size={32} color="white" />
-            </Button>
-            <Slider
-              style={{width: 100, height: 40}}
-              minimumValue={0}
-              maximumValue={1}
-              minimumTrackTintColor="#FFFFFF"
-              maximumTrackTintColor="#000000"
-              onValueChange={value => {
-                console.log(value)
-              }}
-            />
+        >
+          <RecordingTitle>Recording {index + 1} - {getDurationFormatted(rec.duration)}</RecordingTitle>
+          
+          <Button 
+            activeOpacity={.7}
+            onPress={() => rec.sound.replayAsync()}
+          >
+            <Ionicons name="md-play" size={32} color="white" />
+          </Button>
+          <Button 
+            activeOpacity={.7}
+            onPress={() => deleteRecording(index)}
+          >
+            <Ionicons name="md-trash" size={32} color="white" />
+          </Button>
+          <Slider
+            style={{width: '100%', height: 40}}
+            minimumValue={0}
+            maximumValue={1}
+            minimumTrackTintColor="#ddd"
+            maximumTrackTintColor="#000"
+            thumbTintColor='#ddd'
+            onValueChange={value => {
+              console.log(value)
+            }}
+          />
         </Recording>
       )
     })
   }
 
+  const deleteRecording = index => {
+    console.log(index)
+  } 
+
+  const clearStorage = () => {
+    setRecordings([])
+    AsyncStorage.clear()
+  }
+
   return (
     <>
-      <SafeAreaView >
-        <ScrollView>
-          <View style={styles.container}>
-            <Text>{message}</Text>
-            <Pressable style={styles.btn} >
-              <Text styles={styles.btnText}>{recording ? 'Stop Recording' : 'Start Recording'}</Text>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+          setModalVisible(!modalVisible);
+        }}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Hello World!</Text>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => setModalVisible(!modalVisible)}>
+              <Text style={styles.textStyle}>Hide Modal</Text>
             </Pressable>
+          </View>
+        </View>
+      </Modal>
+    <StatusBar translucent 
+      backgroundColor="transparent"
+      barStyle="light-content"
+    />
+      <DarkAreaView>
+        <ScrollView overScrollMode='never'>
+          <View>
+            <Text>{message}</Text>
             {getRecordingLines()}
-            <StatusBar style="auto" />
           </View>
         </ScrollView>
-      </SafeAreaView>
+      </DarkAreaView>
       <ControlPanel>
-        <RecordButtonOutline />
+        <RecordButtonOutline>
         <RecordButton as={Animated.TouchableOpacity} style={{ borderRadius, transform: [ { scale }]}}
           activeOpacity={.7}
           onPress={recording ? stopRecording : startRecording }
           recording={recording}
         />
+        </RecordButtonOutline>
+        <Pressable onPress={() => clearStorage()}>
+          <Text style={{ color: 'white' }}>Reset AsyncStorage</Text>
+        </Pressable>
       </ControlPanel>
     </>
   )
@@ -152,11 +212,6 @@ const Button = styled.TouchableOpacity`
   border-radius: 10px;
 `
 
-const ButtonText = styled.Text`
-  width: 100%;
-  text-align: center;
-  font-weight: bold;
-`
 
 const ControlPanel = styled.View`
   flex-direction: row;
@@ -167,11 +222,11 @@ const ControlPanel = styled.View`
   left: 0;
   right: 0;
   background-color: black;
-  height: 100px;
+  height: 15%;
 `
 
 const RecordButtonOutline = styled.View`
-  position: absolute;
+
   height: 70px;
   width: 70px;
   background-color: #000;
@@ -188,12 +243,7 @@ const RecordButton = styled.TouchableOpacity`
   height: 60px;
   width: 60px;
   border-radius: 999px;
-
-
-
-
 `
-
 
 const Recording = styled.View`
   flex-direction: column;
@@ -201,9 +251,9 @@ const Recording = styled.View`
   width: 100%;
   justify-content: space-between;
   align-items: center;
-  border-top-width: 1px;
   border-bottom-width: 1px;
-  border-color: red;
+  border-color: #333;
+  padding: 20px;
 `
 const RecordingTitle = styled.Text`
   width: 100%;
@@ -212,25 +262,52 @@ const RecordingTitle = styled.Text`
   justify-content: flex-start;
 `
 
+const DarkAreaView = styled.SafeAreaView`
+  padding-top: 10px;
+  background-color: #222;
+  height: 85%;
+`
+
 const styles = StyleSheet.create({
-  container: {
+  centeredView: {
     flex: 1,
-    backgroundColor: '#111',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'black'
   },
-  fill: {
-    flex: 1,
-    margin: 16,
-    color: '#ddd'
-  },
-  btn: {
+  modalView: {
     backgroundColor: 'white',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 10,
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    backgroundColor: 'black',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  btnText: {
-    color: 'black'
-  }
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: '#F194FF',
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
 });
