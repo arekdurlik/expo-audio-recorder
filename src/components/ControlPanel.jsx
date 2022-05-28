@@ -1,6 +1,6 @@
 
-import { useContext, useRef, useEffect } from 'react'
-import { Animated, Pressable, Text } from 'react-native'
+import { useRef, useEffect } from 'react'
+import { Animated } from 'react-native'
 import styled from 'styled-components/native'
 
 const ControlPanel = ({ handlePress, recording }) => {

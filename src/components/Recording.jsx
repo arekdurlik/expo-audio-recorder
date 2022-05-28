@@ -1,18 +1,43 @@
 import styled from 'styled-components/native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import Slider from '@react-native-community/slider'
+import { TouchableOpacity, Text } from 'react-native'
 import { Audio } from 'expo-av'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-const Recording = ({rec, index}) => {
+const Recording = ({data: { title, uri, duration }, index, recording, activeRecording, setActiveRecording}) => {
+  const [isLoaded, setLoaded] = useState(false)
+  const [isStarted, setStarted] = useState(false)
+  const [isPaused, setPaused] = useState(false)
   const [position, setPosition] = useState(0)
-
-  useEffect(() => {
-    
-  }, [])
+  const sound = useRef(new Audio.Sound())
   
-  const getDurationFormatted = (millis) => {
-    console.log(millis)
+  //unload if user has started recording
+  useEffect(() => {
+    if (isLoaded && recording) {
+      unloadSound()
+    }
+  }, [recording])
+
+  //unload every sound that is currently loaded if it's not the one that the user has just activated
+  useEffect(() => {
+    if (isLoaded && index != activeRecording) unloadSound()
+  }, [activeRecording])
+
+  const unloadSound = async () => {
+    setPaused(false)
+
+    await sound.current.stopAsync()
+    setStarted(false)
+
+    await sound.current.setPositionAsync(0);
+    setPosition(0)
+
+    await sound.current.unloadAsync()
+    setLoaded(false)
+  }
+
+  const formatDuration = millis => {
     const minutes = millis / 1000 / 60
     const minutesDisplay = Math.floor(minutes)
     const seconds = Math.round((minutes - minutesDisplay) * 60)
@@ -21,26 +46,44 @@ const Recording = ({rec, index}) => {
   }
   
   const playRecording = async () => {
-    const { sound } = await Audio.Sound.createAsync({ uri: rec }, {shouldPlay: true})
-    await sound.setPositionAsync(0);
-    await sound.setStatusAsync({ progressUpdateIntervalMillis: 50 })
-    await sound.playAsync()
+    if (!isLoaded) {
+      await sound.current.loadAsync({ uri: uri }, { shouldPlay: true })
+      setActiveRecording(index)
+      setLoaded(true)
+    }
+    
+    if (!isStarted) {
+      await sound.current.setPositionAsync(0);
+      await sound.current.setStatusAsync({ progressUpdateIntervalMillis: 50 })
+    }
+    
+    await sound.current.playAsync()
+    setStarted(true)
+    
+    setPaused(false)
+    
+    sound.current.setOnPlaybackStatusUpdate(status => {
+      if (status.isPlaying) setPosition(status.positionMillis / status.durationMillis)
 
-    sound.setOnPlaybackStatusUpdate(status => {
-      setPosition(status.positionMillis / status.durationMillis)
+      if (status.didJustFinish) setStarted(false)
     })
+  }
 
+  const pauseRecording = async () => {
+    await sound.current.pauseAsync()
+    setPaused(true)
   }
 
   return (
     <Container>
-      <RecordingTitle>Recording {index + 1} - </RecordingTitle>
-      <Button 
+      <RecordingTitle>{title ? title : `Recording ${index + 1}`} - {formatDuration(duration)}</RecordingTitle>
+      <TouchableOpacity 
         activeOpacity={.7}
-        onPress={() => playRecording()}
+        onPress={() => !isStarted || isPaused ? playRecording() : pauseRecording()}
       >
-        <Ionicons name="md-play" size={32} color="white" />
-      </Button>
+        <Ionicons name={ !isStarted || isPaused ? 'md-play' : 'md-pause'} size={32} color="white" />
+      </TouchableOpacity>
+      {/* <Text style={{ color: 'white' }}>started: {started ? 'true' : 'false' }, paused: {paused ? 'true' : 'false' }, loaded: {loaded ? 'true' : 'false' }</Text> */}
       <Slider
         style={{width: '100%', height: 40}}
         minimumValue={0}
@@ -59,18 +102,6 @@ const Recording = ({rec, index}) => {
 
 export default Recording
 
-const Button = styled.TouchableOpacity`
-  min-width: 60px;
-  border-radius: 10px;
-`
-
-const RecordingTitle = styled.Text`
-  width: 100%;
-  color: white;
-  display: flex;
-  justify-content: flex-start;
-`
-
 const Container = styled.View`
   flex-direction: column;
   height: 100px;
@@ -80,4 +111,11 @@ const Container = styled.View`
   border-bottom-width: 1px;
   border-color: #333;
   padding: 20px;
+`
+
+const RecordingTitle = styled.Text`
+  width: 100%;
+  color: white;
+  display: flex;
+  justify-content: flex-start;
 `
