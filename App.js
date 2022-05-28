@@ -1,9 +1,11 @@
-import { StyleSheet, StatusBar, Text, View, Pressable, SafeAreaView, ScrollView} from 'react-native'
-import { useState, useRef, useEffect, createContext, useContext } from 'react'
+import { useState, useEffect } from 'react'
+import { StatusBar, View, ScrollView} from 'react-native'
 import { Audio } from 'expo-av'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import styled from 'styled-components/native'
+
 import Recording from './src/components/Recording'
+import Header from './src/components/Header'
 import ControlPanel from './src/components/ControlPanel'
 
 export default function App() {
@@ -15,9 +17,10 @@ export default function App() {
       getRecordings()
   }, [])
 
-  useEffect(() => {
-    console.log('recs: ',  recordings)
-  }, [recordings])
+  const clearStorage = () => {
+    setRecordings([])
+    AsyncStorage.clear()
+  }
 
   const getRecordings = async () => {
     try {
@@ -44,10 +47,10 @@ export default function App() {
           
           setRecording(recording)
         } else {
-          setMessage('Please grant permission to access microphone', err)
+          console.error('permissions not granted error: ', err)
         }
       } catch (err) {
-        console.error('Failed to start recording', err)
+        console.error('recording start error: ', err)
       }   
   }
 
@@ -56,10 +59,10 @@ export default function App() {
     try {
       await recording.stopAndUnloadAsync()
     } catch (err) {
-      console.log('recording err', err)
+      console.log('recording stop error: ', err)
     }
 
-    const { sound, status } = await recording.createNewLoadedSoundAsync()
+    const { status } = await recording.createNewLoadedSoundAsync()
 
     console.log('recording saved at: ' + recording.getURI())
 
@@ -76,30 +79,34 @@ export default function App() {
 
   return (
     <>
-      <StatusBar translucent 
+      <StatusBar 
+        translucent 
         backgroundColor="transparent"
         barStyle="light-content"
       />
-      
         <DarkAreaView>
           <ScrollView overScrollMode='never'>
+            <Header onDelete={() => clearStorage()} />
             <View>
               {recordings.map((elem, index) => {
                 return (
                   <Recording 
-                  data={elem} 
-                  index={index} 
-                  key={index} 
-                  recording={recording}
-                  activeRecording={activeRecording}
-                  setActiveRecording={() => setActiveRecording(index)}
+                    data={elem} 
+                    index={index} 
+                    key={index} 
+                    recording={recording}
+                    activeRecording={activeRecording}
+                    setActiveRecording={() => setActiveRecording(index)}
                   />
                 )
               })}
             </View>
           </ScrollView>
         </DarkAreaView>
-        <ControlPanel recording={recording} handlePress={() => { recording ? stopRecording() : startRecording() }} />
+        <ControlPanel 
+          recording={recording} 
+          handlePress={() => { recording ? stopRecording() : startRecording() }} 
+        />
     </>
   )
 }

@@ -33,8 +33,6 @@ const ControlPanel = ({ handlePress, recording }) => {
     }
   }, [recording])
 
-
-
   return (
     <>
       <Wrapper>
@@ -64,7 +62,6 @@ const Wrapper = styled.View`
 `
 
 const RecordButtonOutline = styled.View`
-
   height: 70px;
   width: 70px;
   background-color: #000;

@@ -1,22 +1,21 @@
-import styled from 'styled-components/native'
-import Ionicons from '@expo/vector-icons/Ionicons'
-import Slider from '@react-native-community/slider'
-import { TouchableOpacity, Text } from 'react-native'
-import { Audio } from 'expo-av'
 import { useEffect, useRef, useState } from 'react'
+import { TouchableOpacity } from 'react-native'
+import { Audio } from 'expo-av'
+import styled from 'styled-components/native'
+import Slider from '@react-native-community/slider'
+import Ionicons from '@expo/vector-icons/Ionicons'
 
 const Recording = ({data: { title, uri, duration }, index, recording, activeRecording, setActiveRecording}) => {
-  const [isLoaded, setLoaded] = useState(false)
+  const [isLoaded, setLoaded]   = useState(false)
   const [isStarted, setStarted] = useState(false)
-  const [isPaused, setPaused] = useState(false)
+  const [isPaused, setPaused]   = useState(false)
   const [position, setPosition] = useState(0)
+
   const sound = useRef(new Audio.Sound())
   
-  //unload if user has started recording
+  //unload sound if user has started recording
   useEffect(() => {
-    if (isLoaded && recording) {
-      unloadSound()
-    }
+    if (isLoaded && recording) unloadSound()
   }, [recording])
 
   //unload every sound that is currently loaded if it's not the one that the user has just activated
@@ -30,7 +29,7 @@ const Recording = ({data: { title, uri, duration }, index, recording, activeReco
     await sound.current.stopAsync()
     setStarted(false)
 
-    await sound.current.setPositionAsync(0);
+    await sound.current.setPositionAsync(0)
     setPosition(0)
 
     await sound.current.unloadAsync()
@@ -47,24 +46,22 @@ const Recording = ({data: { title, uri, duration }, index, recording, activeReco
   
   const playRecording = async () => {
     if (!isLoaded) {
-      await sound.current.loadAsync({ uri: uri }, { shouldPlay: true })
+      await sound.current.loadAsync({ uri }, { shouldPlay: true })
       setActiveRecording(index)
       setLoaded(true)
     }
     
     if (!isStarted) {
-      await sound.current.setPositionAsync(0);
+      await sound.current.setPositionAsync(0)
       await sound.current.setStatusAsync({ progressUpdateIntervalMillis: 50 })
     }
     
     await sound.current.playAsync()
     setStarted(true)
-    
     setPaused(false)
     
     sound.current.setOnPlaybackStatusUpdate(status => {
       if (status.isPlaying) setPosition(status.positionMillis / status.durationMillis)
-
       if (status.didJustFinish) setStarted(false)
     })
   }
