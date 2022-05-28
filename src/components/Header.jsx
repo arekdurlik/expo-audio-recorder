@@ -38,12 +38,12 @@ const Header = ({ onDelete }) => {
         </ModalBackground>
       </Modal>
       <Container>
-        <Title>Recordings</Title>
+        <Title>All Recordings</Title>
         <TouchableOpacity 
           activeOpacity={.7}
           onPress={() => setModalVisible(true)}
         >
-          <Ionicons name="md-trash" size={32} color="white" />
+          <Ionicons name="md-trash" size={28} color="#2159ca" />
         </TouchableOpacity>
       </Container>
     </>
@@ -56,14 +56,14 @@ const Container = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 30px;
+  padding: 30px 15px 15px 15px;
 `
 
 const Title = styled.Text`
   font-size: 30px;
   color: #ddd;
-  font-weight: 600;
-  letter-spacing: 1px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
 `
 
 const ModalBackground = styled.View`
@@ -85,7 +85,6 @@ const ModalContainer = styled.View`
   margin: 20px;
   align-items: center;
   justify-content: center;
-
 `
 
 const ModalMessage = styled.Text`

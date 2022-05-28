@@ -1,6 +1,7 @@
 
 import { useRef, useEffect, useState } from 'react'
 import { Animated } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import { Audio } from 'expo-av'
 import { clamp } from '../helpers'
 import styled from 'styled-components/native'
@@ -82,6 +83,7 @@ const ControlPanel = ({ recordings, setRecordings, recording, setRecording }) =>
     const newRecordings = [...recordings, {
       title: null,
       duration: status.durationMillis,
+      date: new Date(),
       uri: recording.getURI(),
     }]
 
@@ -98,12 +100,16 @@ const ControlPanel = ({ recordings, setRecordings, recording, setRecording }) =>
       >
         {recording && recordingData.map((bar, index) => {
           return (
-            <BarWrapper key={index} style={{ height: bar * 4.5, opacity: bar / 75 }} >
+            <BarWrapper 
+              key={index} 
+              style={{ height: bar * 4.5, opacity: bar / 75 }} 
+            >
               <Bar />
             </BarWrapper>
           )
         })}
       </WaveForm>
+      <Gradient />
       <Wrapper>
         <Controls>
           <RecordButtonOutline>
@@ -122,6 +128,16 @@ const ControlPanel = ({ recordings, setRecordings, recording, setRecording }) =>
 
 export default ControlPanel
 
+export const Gradient = styled(LinearGradient).attrs({
+  colors: ['transparent','rgb(0,0,0)'],
+  start: { x: 0, y: 0 },
+  end: { x: 0, y: 1 },
+ })`
+  height: 50px;
+  width: 100%;
+  position: absolute;
+  bottom: 15%;
+ `;
 
 const Wrapper = styled.View`
   background-color: black;

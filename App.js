@@ -73,6 +73,7 @@ export default function App() {
 
 const DarkAreaView = styled.SafeAreaView`
   padding-top: 10px;
-  background-color: #222;
+  background-color: #000;
   height: 85%;
+  padding-bottom: 15px;
 `
