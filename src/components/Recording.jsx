@@ -53,7 +53,7 @@ const Recording = ({data: { title, uri, duration }, index, recording, activeReco
     
     if (!isStarted) {
       await sound.current.setPositionAsync(0)
-      await sound.current.setStatusAsync({ progressUpdateIntervalMillis: 50 })
+      await sound.current.setProgressUpdateIntervalAsync(20)
     }
     
     await sound.current.playAsync()

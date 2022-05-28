@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { StatusBar, View, ScrollView} from 'react-native'
-import { Audio } from 'expo-av'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import styled from 'styled-components/native'
 
@@ -17,64 +16,22 @@ export default function App() {
       getRecordings()
   }, [])
 
-  const clearStorage = () => {
-    setRecordings([])
-    AsyncStorage.clear()
-  }
-
   const getRecordings = async () => {
     try {
       const value = await AsyncStorage.getItem('recordings')
+
       if(value !== null) {
         const data = await JSON.parse(value)
         setRecordings(data)
       }
-    } catch(e) {}
-  }
-
-  const startRecording = async () => {
-    try {
-      const permission = await Audio.requestPermissionsAsync()
-
-      if (permission.status === 'granted') {
-        await Audio.setAudioModeAsync({
-          staysActiveInBackground: true
-        })
-        
-        const { recording } = await Audio.Recording.createAsync(
-          Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-          )
-          
-          setRecording(recording)
-        } else {
-          console.error('permissions not granted error: ', err)
-        }
-      } catch (err) {
-        console.error('recording start error: ', err)
-      }   
-  }
-
-  const stopRecording = async () => {
-    setRecording(undefined)
-    try {
-      await recording.stopAndUnloadAsync()
-    } catch (err) {
-      console.log('recording stop error: ', err)
+    } catch(err) {
+      console.log('get recordings error: ', err)
     }
+  }
 
-    const { status } = await recording.createNewLoadedSoundAsync()
-
-    console.log('recording saved at: ' + recording.getURI())
-
-    const newRecordings = [...recordings, {
-      title: null,
-      duration: status.durationMillis,
-      uri: recording.getURI(),
-    }]
-
-    await AsyncStorage.setItem('recordings', JSON.stringify(newRecordings))
-
-    setRecordings(newRecordings)
+  const clearStorage = () => {
+    setRecordings([])
+    AsyncStorage.clear()
   }
 
   return (
@@ -103,9 +60,12 @@ export default function App() {
             </View>
           </ScrollView>
         </DarkAreaView>
-        <ControlPanel 
+        <ControlPanel
+          recordings={recordings}
+          setRecordings={setRecordings} 
           recording={recording} 
-          handlePress={() => { recording ? stopRecording() : startRecording() }} 
+          setRecording={recording => setRecording(recording)}
+          handlePress={() => {  }} 
         />
     </>
   )
