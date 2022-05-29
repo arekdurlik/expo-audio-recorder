@@ -10,7 +10,7 @@ import i18n from 'i18n-js'
 
 import Modal, { ModalMessage, ModalWarning, ModalButtons, ModalButton, ModalButtonText } from './Modal'
 
-const Recording = ({data: { title, date, duration, uri, id }}, index) => {
+const Recording = ({data: { title, date, duration, uri, id }, index}) => {
   const [{ recording, recordings, activeRecording }, dispatch] = useRecordingState()
   const [isBeingAltered, setBeingAltered] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
@@ -56,7 +56,7 @@ const Recording = ({data: { title, date, duration, uri, id }}, index) => {
   
   //unload every sound that is currently loaded if it's not the one that user has just activated
   useEffect(() => {
-    if (id != activeRecording) {
+    if (index != activeRecording) {
       if (isLoaded) unloadSound()
       setActive(false)
       return
@@ -81,7 +81,7 @@ const Recording = ({data: { title, date, duration, uri, id }}, index) => {
   const playRecording = async () => {
     if (!isLoaded) {
       await sound.current.loadAsync({ uri }, { shouldPlay: true })
-      dispatch({ type: 'SET_ACTIVE_RECORDING', payload: id})
+      dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index})
       setLoaded(true)
     }
     
@@ -106,10 +106,13 @@ const Recording = ({data: { title, date, duration, uri, id }}, index) => {
   }
 
   const deleteRecording = async () => {
+    setActive(false)
     const newRecordings = [...recordings]
     newRecordings.splice(index, 1)
     await storeRecordingsAsync(newRecordings)
+    dispatch({ type: 'SET_ACTIVE_RECORDING', payload: null})
     dispatch({ type: 'SET_RECORDINGS', payload: newRecordings })
+    setModalVisible(false)
   }
 
   const changeSlider = async val => {
@@ -119,6 +122,8 @@ const Recording = ({data: { title, date, duration, uri, id }}, index) => {
   } 
 
   const changeTitle = async ({ nativeEvent: { text }}) => {
+    if (text == `${i18n.t('recording.defaultTitle')} ${id}`) return
+    
     const newRecordings = [...recordings]
     newRecordings[index] = {...newRecordings[index], title: text}
 
@@ -145,7 +150,7 @@ const Recording = ({data: { title, date, duration, uri, id }}, index) => {
             </ModalButton>
           </ModalButtons>
         </Modal>
-      <Container onPress={() => dispatch({ type: 'SET_ACTIVE_RECORDING', payload: id })}>
+      <Container onPress={() => dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index })}>
         <Info>
           <Title
             onEndEditing={changeTitle}
@@ -187,7 +192,6 @@ const Recording = ({data: { title, date, duration, uri, id }}, index) => {
               <Ionicons name="md-trash" size={28} color="#2159ca" />
             </DeleteButton>
           </Buttons>
-        {/* <Text style={{ color: 'white' }}>started: {started ? 'true' : 'false' }, paused: {paused ? 'true' : 'false' }, loaded: {loaded ? 'true' : 'false' }</Text> */}
         </Drawer>
       </Container>
     </>
@@ -214,7 +218,7 @@ const Info = styled.View`
   height: 55px;
 `
 const Title = styled.TextInput`
-  width: 100%;
+  align-self: flex-start;
   font-size: 18px;
   font-weight: 600;
   color: white;

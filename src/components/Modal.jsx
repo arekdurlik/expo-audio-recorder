@@ -5,16 +5,16 @@ const Modal = ({visible, children}) => {
 
   return (
     <RNModal
-        animationType="fade"
-        transparent={true}
-        visible={visible}
-        >
-        <ModalBackground>
-          <ModalContainer>
-            {children}
-          </ModalContainer>
-        </ModalBackground>
-      </RNModal>
+      animationType="fade"
+      transparent={true}
+      visible={visible}
+    >
+      <ModalBackground>
+        <ModalContainer>
+          {children}
+        </ModalContainer>
+      </ModalBackground>
+    </RNModal>
   )
 }
 
