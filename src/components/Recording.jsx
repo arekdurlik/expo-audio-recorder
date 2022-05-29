@@ -5,10 +5,10 @@ import { formatDuration } from '../helpers'
 import styled from 'styled-components/native'
 import Slider from '@react-native-community/slider'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { useRecordingState } from '../RecordingContext'
+import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
 
 const Recording = ({data: { title, date, duration, uri }, index}) => {
-  const [{ recording, activeRecording }, dispatch] = useRecordingState()
+  const [{ recording, recordings, activeRecording }, dispatch] = useRecordingState()
   const [isLoaded, setLoaded]   = useState(false)
   const [isStarted, setStarted] = useState(false)
   const [isPaused, setPaused]   = useState(false)
@@ -100,11 +100,21 @@ const Recording = ({data: { title, date, duration, uri }, index}) => {
     setPaused(true)
   }
 
+  const changeTitle = async ({ nativeEvent: { text }}) => {
+    console.log('submit: ', text)
+    const newRecordings = [...recordings]
+    let newRecording = {...newRecordings[index]}
+    newRecording.title = text
+    
+    await storeRecordingsAsync(newRecordings)
+    dispatch({ type: 'SET_RECORDINGS', payload: newRecordings })
+  }
+
   return (
     <Container onPress={() => dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index })}>
       <Info>
         <Title
-          onSubmitEditing={({text}) => console.log(text)}
+          onEndEditing={changeTitle}
           selectionColor={'#2159ca'}>
             {title ? title : `New Recording ${index + 1}`}
           </Title>

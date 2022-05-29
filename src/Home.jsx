@@ -10,7 +10,7 @@ import ControlPanel from './components/ControlPanel'
 
 import * as Localization from 'expo-localization'
 import i18n from 'i18n-js'
-import { useRecordingState } from './RecordingContext'
+import { useRecordingState, getRecordingsAsync } from './RecordingContext'
 
 const en = {
   main: {
@@ -32,20 +32,12 @@ const Home = () => {
   const [{ recordings }, dispatch] = useRecordingState()
   
   useEffect(() => {
-      getRecordings()
+    getRecordings()
   }, [])
 
   const getRecordings = async () => {
-    try {
-      const value = await AsyncStorage.getItem('recordings')
-
-      if(value !== null) {
-        const data = await JSON.parse(value)
-        dispatch({ type: 'SET_RECORDINGS', payload: data})
-      }
-    } catch(err) {
-      console.error('get recordings error: ', err)
-    }
+    const recordings = await getRecordingsAsync()
+    dispatch({ type: 'SET_RECORDINGS', payload: recordings })
   }
 
   return (

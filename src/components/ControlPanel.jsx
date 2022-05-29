@@ -5,8 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Audio } from 'expo-av'
 import { clamp, formatDuration, formatDate } from '../helpers'
 import styled from 'styled-components/native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useRecordingState } from '../RecordingContext'
+import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
 
 
 const ControlPanel = () => {
@@ -99,10 +98,8 @@ const ControlPanel = () => {
       date: formatDate(new Date()),
       uri: recording.getURI(),
     }]
-    
-    await AsyncStorage.setItem('recordings', JSON.stringify(newRecordings))
-    
-    dispatch({ type: 'SET_RECORDINGS', payload: newRecordings})
+    await storeRecordingsAsync(newRecordings)
+    dispatch({ type: 'SET_RECORDINGS', payload: newRecordings })
     recordingData.current = new Array(18).fill(0)
   }
 
