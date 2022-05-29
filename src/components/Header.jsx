@@ -3,6 +3,7 @@ import { TouchableOpacity } from 'react-native'
 import styled from 'styled-components/native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
+import i18n from 'i18n-js'
 
 import Modal, { ModalMessage, ModalWarning, ModalButtons, ModalButton, ModalButtonText } from './Modal'
 
@@ -20,24 +21,24 @@ const Header = () => {
   return (
     <>
       <Modal visible={modalVisible}>
-        <ModalMessage>Delete all recordings?</ModalMessage>
-        <ModalWarning>This action is irreversible.</ModalWarning>
+        <ModalMessage>{i18n.t('recording.deleteAll.message')}</ModalMessage>
+        <ModalWarning>{i18n.t('recording.deleteAll.warning')}</ModalWarning>
         <ModalButtons>
           <ModalButton 
             style={{ borderRightWidth: 1 }}
             activeOpacity={.9}
             onPress={() => handleDelete()}>
-            <ModalButtonText>Delete</ModalButtonText>
+            <ModalButtonText>{i18n.t('modal.delete')}</ModalButtonText>
           </ModalButton>
           <ModalButton
             activeOpacity={.9}
             onPress={() => setModalVisible(false)}>
-            <ModalButtonText>Cancel</ModalButtonText>
+            <ModalButtonText>{i18n.t('modal.cancel')}</ModalButtonText>
           </ModalButton>
         </ModalButtons>
       </Modal>
       <Container>
-        <Title>All Recordings</Title>
+        <Title>{i18n.t('main.title')}</Title>
         {recordings.length > 0 && (
           <TouchableOpacity 
             activeOpacity={.7}

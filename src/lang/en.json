@@ -1,0 +1,35 @@
+{
+  "main": {
+    "title": "All Recordings"
+  },
+  "recording": {
+    "delete": {
+      "message":  "Delete this recording?",
+      "warning": "This action is irreversible"
+    },
+    "deleteAll": {
+      "message": "Delete all recordings?",
+      "warning": "This action is irreversible"
+    },
+    "defaultTitle": "New Recording"
+  },
+  "modal": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "months": {
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December"
+  }
+}

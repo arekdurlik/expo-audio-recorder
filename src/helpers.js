@@ -1,3 +1,5 @@
+import i18n from 'i18n-js'
+
 export const clamp = (val, min, max) => Math.min(Math.max(val, min), max)
 
 export const formatDuration = millis => {
@@ -8,20 +10,31 @@ export const formatDuration = millis => {
   return `${minutesDisplay}:${secondsDisplay}`
 }
 
-export const formatDate = date => {
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+export const formatDate = string => {
+  const date = new Date(string)
+  const months = [
+    i18n.t('months.january'),
+    i18n.t('months.february'),
+    i18n.t('months.march'),
+    i18n.t('months.april'),
+    i18n.t('months.may'),
+    i18n.t('months.june'),
+    i18n.t('months.july'),
+    i18n.t('months.august'),
+    i18n.t('months.september'),
+    i18n.t('months.october'),
+    i18n.t('months.november'),
+    i18n.t('months.december'),
+  ]
   const day = `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
   const time = `${('0' +  date.getHours()).slice(-2)}:${('0' +  date.getMinutes()).slice(-2)}` // prepend zero
   return `${day} ${time}`
 }
 
-export const getAvailableIndex = (recordings, defaultTitle) => {
+export const getNextId = recordings => {
   let newIndex = 1
 
-  if (recordings.length === 0) return `${defaultTitle} ${newIndex}`
+  if (recordings?.length > 0) newIndex = parseInt(recordings[recordings.length - 1].id) + 1
 
-  recordings.filter(({title}) => {
-    if (title.startsWith(defaultTitle)) newIndex = parseInt(title.replace(defaultTitle, '')) + 1
-  })
-  return `${defaultTitle} ${newIndex}`
+  return newIndex
 }

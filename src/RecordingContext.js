@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export const RecoringStateCTX = createContext()
 export const useRecordingState = () => useContext(RecoringStateCTX)
+
 const initialState = {
   recordings: [],
   recording: null,

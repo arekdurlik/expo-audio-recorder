@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { Animated } from 'react-native'
 import { Audio } from 'expo-av'
-import { formatDuration } from '../helpers'
+import { formatDuration, formatDate } from '../helpers'
 import styled from 'styled-components/native'
 import Slider from '@react-native-community/slider'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
+import i18n from 'i18n-js'
 
 import Modal, { ModalMessage, ModalWarning, ModalButtons, ModalButton, ModalButtonText } from './Modal'
 
-const Recording = ({data: { title, date, duration, uri }, index}) => {
+const Recording = ({data: { title, date, duration, uri, id }}, index) => {
   const [{ recording, recordings, activeRecording }, dispatch] = useRecordingState()
   const [isBeingAltered, setBeingAltered] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
@@ -34,15 +35,15 @@ const Recording = ({data: { title, date, duration, uri }, index}) => {
   useEffect(() => {
     if (isActive) {
       Animated.parallel([
-        Animated.timing(drawerHeight, { toValue: 100, duration: 150, useNativeDriver: false }),
-        Animated.timing(drawerPadding, { toValue: 15, duration: 150, useNativeDriver: false }),
-        Animated.timing(drawerOpacity, { toValue: 1, duration: 300, useNativeDriver: false })
+        Animated.timing(drawerHeight, { toValue: 100, duration: 300, useNativeDriver: false }),
+        Animated.timing(drawerPadding, { toValue: 15, duration: 300, useNativeDriver: false }),
+        Animated.timing(drawerOpacity, { toValue: 1, duration: 150, useNativeDriver: false })
       ]).start()
     } else {
       Animated.parallel([
-        Animated.timing(drawerHeight, { toValue: 0, duration: 150, useNativeDriver: false }),
-        Animated.timing(drawerPadding, { toValue: 0, duration: 150, useNativeDriver: false }),
-        Animated.timing(drawerOpacity, { toValue: 0, duration: 300, useNativeDriver: false })
+        Animated.timing(drawerHeight, { toValue: 0, duration: 300, useNativeDriver: false }),
+        Animated.timing(drawerPadding, { toValue: 0, duration: 300, useNativeDriver: false }),
+        Animated.timing(drawerOpacity, { toValue: 0, duration: 150, useNativeDriver: false })
       ]).start()
     }
 
@@ -55,12 +56,11 @@ const Recording = ({data: { title, date, duration, uri }, index}) => {
   
   //unload every sound that is currently loaded if it's not the one that user has just activated
   useEffect(() => {
-    if (index != activeRecording) {
+    if (id != activeRecording) {
       if (isLoaded) unloadSound()
       setActive(false)
       return
     }
-
     setActive(true)
   }, [activeRecording])
 
@@ -81,7 +81,7 @@ const Recording = ({data: { title, date, duration, uri }, index}) => {
   const playRecording = async () => {
     if (!isLoaded) {
       await sound.current.loadAsync({ uri }, { shouldPlay: true })
-      dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index})
+      dispatch({ type: 'SET_ACTIVE_RECORDING', payload: id})
       setLoaded(true)
     }
     
@@ -129,31 +129,31 @@ const Recording = ({data: { title, date, duration, uri }, index}) => {
   return (
     <>
       <Modal visible={modalVisible}>
-          <ModalMessage>Delete this recording?</ModalMessage>
-          <ModalWarning>This action is irreversible.</ModalWarning>
+          <ModalMessage>{i18n.t('recording.delete.message')}</ModalMessage>
+          <ModalWarning>{i18n.t('recording.delete.warning')}</ModalWarning>
           <ModalButtons>
             <ModalButton 
               style={{ borderRightWidth: 1 }}
               activeOpacity={.9}
               onPress={() => deleteRecording()}>
-              <ModalButtonText>Delete</ModalButtonText>
+              <ModalButtonText>{i18n.t('modal.delete')}</ModalButtonText>
             </ModalButton>
             <ModalButton
               activeOpacity={.9}
               onPress={() => setModalVisible(false)}>
-              <ModalButtonText>Cancel</ModalButtonText>
+              <ModalButtonText>{i18n.t('modal.cancel')}</ModalButtonText>
             </ModalButton>
           </ModalButtons>
         </Modal>
-      <Container onPress={() => dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index })}>
+      <Container onPress={() => dispatch({ type: 'SET_ACTIVE_RECORDING', payload: id })}>
         <Info>
           <Title
             onEndEditing={changeTitle}
             selectionColor={'#2159ca'}>
-              {title ? title : `New Recording ${index + 1}`}
+              {title ? title : `${i18n.t('recording.defaultTitle')} ${id}`}
             </Title>
           <InfoBottom>
-            <Date>{date}</Date>
+            <Date>{formatDate(date)}</Date>
             <Duration>{formatDuration(duration)}</Duration>
           </InfoBottom>
         </Info>

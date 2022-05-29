@@ -1,0 +1,35 @@
+{
+  "main": {
+    "title": "Wszystkie nagrania"
+  },
+  "recording": {
+    "delete": {
+      "message": "Usunąć nagranie?",
+      "warning": "Tej akcji nie da się cofnąć"
+    },
+    "deleteAll": {
+      "message": "Usunąć wszystkie nagrania?",
+      "warning": "Tej akcji nie da się cofnąć"
+    },
+    "defaultTitle": "Nowe nagranie"
+  },
+  "modal": {
+    "confirm": "Gitówa",
+    "cancel": "Jednak nie chcę",
+    "delete": "Usuwaj"
+  },
+  "months": {
+    "january": "stycznia",
+    "february": "lutego",
+    "march": "marca",
+    "april": "kwietnia",
+    "may": "maja",
+    "june": "czerwca",
+    "july": "lipca",
+    "august": "sierpnia",
+    "september": "września",
+    "october": "października",
+    "november": "listopada",
+    "december": "grudnia"
+  }
+}

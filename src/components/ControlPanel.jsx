@@ -3,7 +3,7 @@ import { useRef, useEffect, useState } from 'react'
 import { Animated } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Audio } from 'expo-av'
-import { clamp, formatDuration, formatDate, getAvailableIndex } from '../helpers'
+import { clamp, formatDuration, getNextId } from '../helpers'
 import styled from 'styled-components/native'
 import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
 
@@ -49,6 +49,7 @@ const ControlPanel = () => {
   const startRecording = async () => {
     try {
       const permission = await Audio.requestPermissionsAsync()
+      dispatch({ type: 'SET_ACTIVE_RECORDING', payload: null})
 
       if (permission.status === 'granted') {
         await Audio.setAudioModeAsync({
@@ -93,9 +94,10 @@ const ControlPanel = () => {
     console.log('recording saved at: ' + recording.getURI())
     
     const newRecordings = [...recordings, {
-      title: getAvailableIndex([...recordings], 'New Recording'),
+      id: getNextId(recordings),
+      title: null,
       duration: status.durationMillis,
-      date: formatDate(new Date()),
+      date: new Date(),
       uri: recording.getURI(),
     }]
     await storeRecordingsAsync(newRecordings)
@@ -105,7 +107,7 @@ const ControlPanel = () => {
 
   return (
     <>
-      <WaveForm 
+      <Waveform 
         pointerEvents="none" 
         style={{ backgroundColor }}
       >
@@ -122,7 +124,7 @@ const ControlPanel = () => {
             </BarWrapper>
           )
         })}
-      </WaveForm>
+      </Waveform>
       <Gradient />
       <Wrapper>
         <Controls>
@@ -181,7 +183,7 @@ const Wrapper = styled.View`
   overflow: hidden;
   `
 
-const WaveForm = styled(Animated.View)`
+const Waveform = styled(Animated.View)`
   flex-direction: row;
   top: 0;
   bottom: 0;

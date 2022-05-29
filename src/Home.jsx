@@ -1,35 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { StatusBar, View, ScrollView } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import styled from 'styled-components/native'
 
 import Recording from './components/Recording'
 import Header from './components/Header'
 import ControlPanel from './components/ControlPanel'
-
-import * as Localization from 'expo-localization'
-import i18n from 'i18n-js'
 import { useRecordingState, getRecordingsAsync } from './RecordingContext'
 
-const en = {
-  main: {
-    title: 'All Recordings'
-  }
-}
-
-const pl = {
-  main: {
-    title: 'Wszystkie nagrania'
-  }
-}
-
-i18n.translations = { pl, en }
-i18n.locale = Localization.getLocalizationAsync()
-
-
 const Home = () => {
-  const [{ recordings }, dispatch] = useRecordingState()
+  const [{ recordings, recording }, dispatch] = useRecordingState()
   
   useEffect(() => {
     getRecordings()
@@ -47,7 +27,7 @@ const Home = () => {
         backgroundColor="transparent"
         barStyle="light-content"
         />
-        <DarkAreaView>
+        <DarkAreaView pointerEvents={recording ? 'none' : 'auto'}>
         <Gradient />
           <ScrollView overScrollMode='never'>
             <Header />
@@ -56,8 +36,7 @@ const Home = () => {
                 return (
                   <Recording 
                     data={elem} 
-                    index={index} 
-                    key={elem.uri} 
+                    key={index} 
                   />
                 )
               }).reverse()}
