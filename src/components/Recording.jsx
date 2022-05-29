@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useReducer, useRef, useState } from 'react'
 import { Animated } from 'react-native'
 import { Audio } from 'expo-av'
 import { formatDuration } from '../helpers'
@@ -7,13 +7,53 @@ import Slider from '@react-native-community/slider'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
 
+const initialState = {
+  isLoaded: false,
+  isStarted: false,
+  isPaused: false,
+  isActive: false,
+  isBeingAltered: false,
+  position: 0
+}
+
+const reducer = (state, action) => {
+    switch(action.type) {
+      case 'setLoaded':
+        let isLoaded = state.payload
+        return { ...state, isLoaded}
+
+      case 'setStarted':
+        let isStarted = state.payload
+        return { ...state, isStarted}
+      
+      case 'setPaused':
+        let isPaused = state.payload
+        return { ...state, isPaused}
+      
+      case 'setActive':
+        let isActive = state.payload
+        return { ...state, isActive}
+      
+      case 'setBeingAltered':
+        let isBeingAltered = state.payload
+        return { ...state, isBeingAltered}
+
+      case 'setPosition':
+        let position = state.payload
+        return { ...state, position}
+
+      case 'unload':
+        return { ...initialState }
+
+      default:
+        console.log('reducer error')
+        break
+    }
+}
+
 const Recording = ({data: { title, date, duration, uri }, index}) => {
+  const [{ isLoaded, isStarted, isPaused, isActive, isBeingAltered, position }, set] = useReducer(reducer, initialState)
   const [{ recording, recordings, activeRecording }, dispatch] = useRecordingState()
-  const [isLoaded, setLoaded]   = useState(false)
-  const [isStarted, setStarted] = useState(false)
-  const [isPaused, setPaused]   = useState(false)
-  const [isActive, setActive]   = useState(false)
-  const [position, setPosition] = useState(0)
 
   const drawerHeight  = useRef(new Animated.Value(0)).current
   const drawerPadding = useRef(new Animated.Value(0)).current
@@ -52,32 +92,31 @@ const Recording = ({data: { title, date, duration, uri }, index}) => {
   useEffect(() => {
     if (index != activeRecording) {
       if (isLoaded) unloadSound()
-      setActive(false)
+      set({ type: 'setActive', payload: false })
       return
     }
 
-    setActive(true)
+    set({ type: 'setActive', payload: true })
   }, [activeRecording])
 
   const unloadSound = async () => {
-    setPaused(false)
-    setActive(false)
-
     await sound.current.stopAsync()
-    setStarted(false)
-
     await sound.current.setPositionAsync(0)
-    setPosition(0)
-
     await sound.current.unloadAsync()
-    setLoaded(false)
+    set({ type: 'unload', payload: true })
   }
+
+  const changeSlider = async val => {
+    set({ type: 'setBeingAltered', payload: true })
+    await sound.current.setPositionAsync(duration * val)
+    set({ type: 'setBeingAltered', payload: false })
+  } 
   
   const playRecording = async () => {
     if (!isLoaded) {
       await sound.current.loadAsync({ uri }, { shouldPlay: true })
       dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index})
-      setLoaded(true)
+      set({ type: 'setLoaded', payload: true })
     }
     
     if (!isStarted) {
@@ -86,18 +125,21 @@ const Recording = ({data: { title, date, duration, uri }, index}) => {
 
     await sound.current.setProgressUpdateIntervalAsync(20)
     await sound.current.playAsync()
-    setStarted(true)
-    setPaused(false)
+    set({ type: 'setStarted', payload: true })
+    set({ type: 'setPasued', payload: false })
     
     sound.current.setOnPlaybackStatusUpdate(status => {
-      if (status.isPlaying) setPosition(status.positionMillis / status.durationMillis)
-      if (status.didJustFinish) setStarted(false)
+      if (status.isPlaying && !isBeingAltered) 
+        set({ type: 'setPosition', payload: status.positionMillis / status.durationMillis })
+
+      if (status.didJustFinish) 
+        set({ type: 'setStarted', payload: false })
     })
   }
 
   const pauseRecording = async () => {
     await sound.current.pauseAsync()
-    setPaused(true)
+      set({ type: 'setPasued', payload: true })
   }
 
   const changeTitle = async ({ nativeEvent: { text }}) => {
@@ -135,9 +177,7 @@ const Recording = ({data: { title, date, duration, uri }, index}) => {
           minimumTrackTintColor="#ddd"
           maximumTrackTintColor="#444"
           thumbTintColor='#ddd'
-          onValueChange={value => {
-            console.log(value)
-          }}
+          onSlidingComplete={changeSlider}
         />
         <Buttons>
           <PlayButton 
