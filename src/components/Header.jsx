@@ -13,7 +13,6 @@ const Header = () => {
 
   const handleDelete = () => {
     storeRecordingsAsync([])
-    dispatch({ type: 'SET_ACTIVE_RECORDING', payload: null })
     dispatch({ type: 'SET_RECORDINGS', payload: [] })
     setModalVisible(false)
   }

@@ -7,6 +7,8 @@ import Slider from '@react-native-community/slider'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
 import i18n from 'i18n-js'
+import * as Sharing from 'expo-sharing'
+import { MaterialIcons } from '@expo/vector-icons'
 
 import Modal, { ModalMessage, ModalWarning, ModalButtons, ModalButton, ModalButtonText } from './Modal'
 
@@ -18,13 +20,13 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
   const [isStarted, setStarted] = useState(false)
   const [isPaused, setPaused]   = useState(false)
   const [isActive, setActive]   = useState(false)
-  const [position, setPosition] = useState(0)
   
-
   const drawerHeight  = useRef(new Animated.Value(0)).current
   const drawerPadding = useRef(new Animated.Value(0)).current
   const drawerOpacity = useRef(new Animated.Value(0)).current
+  const sliderRef = useRef(null)
   const sound = useRef(new Audio.Sound())
+  const position = useRef(0)
 
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -72,7 +74,7 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
     setStarted(false)
 
     await sound.current.setPositionAsync(0)
-    setPosition(0)
+    sliderRef.current.setNativeProps({ value: 0 })
 
     await sound.current.unloadAsync()
     setLoaded(false)
@@ -85,24 +87,34 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
       setLoaded(true)
     }
     
-    if (!isStarted) {
-      await sound.current.setPositionAsync(0)
-    }
+    if (!isStarted) await sound.current.setPositionAsync(0)
 
-    await sound.current.setProgressUpdateIntervalAsync(20)
+    await sound.current.setProgressUpdateIntervalAsync(1)
     await sound.current.playAsync()
     setStarted(true)
     setPaused(false)
     
     sound.current.setOnPlaybackStatusUpdate(status => {
-      if (status.isPlaying && !isBeingAltered) setPosition(status.positionMillis / status.durationMillis)
+      if (status.isPlaying && !isBeingAltered) 
+        sliderRef.current.setNativeProps({ value: status.positionMillis / status.durationMillis })
+        position.current = status.positionMillis / status.durationMillis
       if (status.didJustFinish) setStarted(false)
     })
   }
 
   const pauseRecording = async () => {
-    await sound.current.pauseAsync()
     setPaused(true)
+    await sound.current.pauseAsync()
+  }
+
+  const skipForward = async () => {
+    await sound.current.setPositionAsync((duration * position.current) + 10000)
+    sliderRef.current.setNativeProps({ value: position.current - (10000 / duration) })
+  }
+
+  const skipBackward = async () => {
+    await sound.current.setPositionAsync((duration * position.current) - 10000)
+    sliderRef.current.setNativeProps({ value: position.current - (10000 / duration) })
   }
 
   const deleteRecording = async () => {
@@ -113,6 +125,10 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
     dispatch({ type: 'SET_ACTIVE_RECORDING', payload: null})
     dispatch({ type: 'SET_RECORDINGS', payload: newRecordings })
     setModalVisible(false)
+  }
+
+  const shareRecording = async () => {
+    await Sharing.shareAsync(uri)
   }
 
   const changeSlider = async val => {
@@ -134,22 +150,22 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
   return (
     <>
       <Modal visible={modalVisible}>
-          <ModalMessage>{i18n.t('recording.delete.message')}</ModalMessage>
-          <ModalWarning>{i18n.t('recording.delete.warning')}</ModalWarning>
-          <ModalButtons>
-            <ModalButton 
-              style={{ borderRightWidth: 1 }}
-              activeOpacity={.9}
-              onPress={() => deleteRecording()}>
-              <ModalButtonText>{i18n.t('modal.delete')}</ModalButtonText>
-            </ModalButton>
-            <ModalButton
-              activeOpacity={.9}
-              onPress={() => setModalVisible(false)}>
-              <ModalButtonText>{i18n.t('modal.cancel')}</ModalButtonText>
-            </ModalButton>
-          </ModalButtons>
-        </Modal>
+        <ModalMessage>{i18n.t('recording.delete.message')}</ModalMessage>
+        <ModalWarning>{i18n.t('recording.delete.warning')}</ModalWarning>
+        <ModalButtons>
+          <ModalButton 
+            style={{ borderRightWidth: 1 }}
+            activeOpacity={.9}
+            onPress={deleteRecording}>
+            <ModalButtonText>{i18n.t('modal.delete')}</ModalButtonText>
+          </ModalButton>
+          <ModalButton
+            activeOpacity={.9}
+            onPress={() => setModalVisible(false)}>
+            <ModalButtonText>{i18n.t('modal.cancel')}</ModalButtonText>
+          </ModalButton>
+        </ModalButtons>
+      </Modal>
       <Container onPress={() => dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index })}>
         <Info>
           <Title
@@ -169,22 +185,42 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
             opacity: drawerOpacity
           }}>
             <Slider
+            ref={sliderRef}
             style={{width: '100%', height: 10}}
             minimumValue={0}
             maximumValue={1}
-            value={position}
             minimumTrackTintColor="#ddd"
             maximumTrackTintColor="#444"
             thumbTintColor='#ddd'
             onSlidingComplete={changeSlider}
           />
           <Buttons>
+            <ShareButton 
+              activeOpacity={.7}
+              onPress={shareRecording}
+            >
+              <Ionicons name="md-share-outline" size={28} color="#2159ca" />
+            </ShareButton>
+            <ReplayButton 
+              activeOpacity={.7}
+              onPress={skipBackward}
+            >
+              <MaterialIcons name="replay-5" size={38} color="#ddd" />
+            </ReplayButton>
             <PlayButton 
               activeOpacity={.7}
               onPress={() => !isStarted || isPaused ? playRecording() : pauseRecording()}
             >
-              <Ionicons name={ !isStarted || isPaused ? 'md-play' : 'md-pause'} size={28} color="white" />
+              <Ionicons name={ !isStarted || isPaused ? 'md-play' : 'md-pause'} size={38} color="#ddd" />
             </PlayButton>
+            <ForwardButton 
+              activeOpacity={.7}
+              onPress={skipForward}
+            >
+              <MaterialIcons name="forward-5" size={38} color="#ddd" />
+            </ForwardButton>
+            
+
             <DeleteButton 
               activeOpacity={.7}
               onPress={() => setModalVisible(true)}
@@ -255,7 +291,20 @@ const Buttons = styled.View`
   height: 100%;
 `
 
+const ShareButton = styled.TouchableOpacity`
+  position: absolute;
+  left: 0;
+`
+
+const ForwardButton = styled.TouchableOpacity`
+  align-self: flex-end;
+`
+
 const PlayButton = styled.TouchableOpacity`
+  align-self: flex-end;
+  margin: 0 10px;
+`
+const ReplayButton = styled.TouchableOpacity`
   align-self: flex-end;
 `
 
