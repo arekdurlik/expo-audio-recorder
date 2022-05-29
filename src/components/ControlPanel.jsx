@@ -3,7 +3,7 @@ import { useRef, useEffect, useState } from 'react'
 import { Animated } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Audio } from 'expo-av'
-import { clamp, formatDuration, formatDate } from '../helpers'
+import { clamp, formatDuration, formatDate, getAvailableIndex } from '../helpers'
 import styled from 'styled-components/native'
 import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
 
@@ -93,7 +93,7 @@ const ControlPanel = () => {
     console.log('recording saved at: ' + recording.getURI())
     
     const newRecordings = [...recordings, {
-      title: null,
+      title: getAvailableIndex([...recordings], 'New Recording'),
       duration: status.durationMillis,
       date: formatDate(new Date()),
       uri: recording.getURI(),

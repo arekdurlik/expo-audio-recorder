@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { TouchableOpacity, Modal } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import styled from 'styled-components/native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
+
+import Modal, { ModalMessage, ModalWarning, ModalButtons, ModalButton, ModalButtonText } from './Modal'
 
 const Header = () => {
   const [{ recordings }, dispatch] = useRecordingState()
@@ -10,35 +12,29 @@ const Header = () => {
 
   const handleDelete = () => {
     storeRecordingsAsync([])
+    dispatch({ type: 'SET_ACTIVE_RECORDING', payload: null })
     dispatch({ type: 'SET_RECORDINGS', payload: [] })
     setModalVisible(false)
   }
 
   return (
     <>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          Alert.alert('Modal has been closed.')
-          setModalVisible(!modalVisible);
-        }}>
-        <ModalBackground>
-          <ModalContainer>
-            <ModalMessage>Delete all recordings?</ModalMessage>
-            <ModalButtons>
-              <ModalButton
-                onPress={() => handleDelete()}>
-                <ModalButtonText>Delete</ModalButtonText>
-              </ModalButton>
-              <ModalButton
-                onPress={() => setModalVisible(!modalVisible)}>
-                <ModalButtonText>Cancel</ModalButtonText>
-              </ModalButton>
-            </ModalButtons>
-          </ModalContainer>
-        </ModalBackground>
+      <Modal visible={modalVisible}>
+        <ModalMessage>Delete all recordings?</ModalMessage>
+        <ModalWarning>This action is irreversible.</ModalWarning>
+        <ModalButtons>
+          <ModalButton 
+            style={{ borderRightWidth: 1 }}
+            activeOpacity={.9}
+            onPress={() => handleDelete()}>
+            <ModalButtonText>Delete</ModalButtonText>
+          </ModalButton>
+          <ModalButton
+            activeOpacity={.9}
+            onPress={() => setModalVisible(false)}>
+            <ModalButtonText>Cancel</ModalButtonText>
+          </ModalButton>
+        </ModalButtons>
       </Modal>
       <Container>
         <Title>All Recordings</Title>
@@ -69,50 +65,4 @@ const Title = styled.Text`
   color: #ddd;
   font-weight: 700;
   letter-spacing: 1.5px;
-`
-
-const ModalBackground = styled.View`
-position: absolute;
-  inset: 0;
-  height: 100%;
-  width: 100%;
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0,0,0,0.5);
-`
-
-const ModalContainer = styled.View`
-  background-color: #333;
-  border-radius: 10px;
-  padding: 20px;
-  width: 70%;
-  margin: 20px;
-  align-items: center;
-  justify-content: center;
-`
-
-const ModalMessage = styled.Text`
-  color: #ddd;
-  padding: 20px;
-`
-
-const ModalButtons = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  width: 100%;
-`
-
-const ModalButton = styled.TouchableOpacity`
-  align-items: center;
-  flex: 1;
-  border-radius: 10px;
-  padding: 10px;
-  z-index: 2;
-  background-color: #ddd;
-  margin: 5px;
-`
-
-const ModalButtonText = styled.Text`
-  color: #111;
 `

@@ -7,13 +7,18 @@ import Slider from '@react-native-community/slider'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
 
+import Modal, { ModalMessage, ModalWarning, ModalButtons, ModalButton, ModalButtonText } from './Modal'
+
 const Recording = ({data: { title, date, duration, uri }, index}) => {
   const [{ recording, recordings, activeRecording }, dispatch] = useRecordingState()
+  const [isBeingAltered, setBeingAltered] = useState(false)
+  const [modalVisible, setModalVisible] = useState(false)
   const [isLoaded, setLoaded]   = useState(false)
   const [isStarted, setStarted] = useState(false)
   const [isPaused, setPaused]   = useState(false)
   const [isActive, setActive]   = useState(false)
   const [position, setPosition] = useState(0)
+  
 
   const drawerHeight  = useRef(new Animated.Value(0)).current
   const drawerPadding = useRef(new Animated.Value(0)).current
@@ -90,7 +95,7 @@ const Recording = ({data: { title, date, duration, uri }, index}) => {
     setPaused(false)
     
     sound.current.setOnPlaybackStatusUpdate(status => {
-      if (status.isPlaying) setPosition(status.positionMillis / status.durationMillis)
+      if (status.isPlaying && !isBeingAltered) setPosition(status.positionMillis / status.durationMillis)
       if (status.didJustFinish) setStarted(false)
     })
   }
@@ -99,6 +104,19 @@ const Recording = ({data: { title, date, duration, uri }, index}) => {
     await sound.current.pauseAsync()
     setPaused(true)
   }
+
+  const deleteRecording = async () => {
+    const newRecordings = [...recordings]
+    newRecordings.splice(index, 1)
+    await storeRecordingsAsync(newRecordings)
+    dispatch({ type: 'SET_RECORDINGS', payload: newRecordings })
+  }
+
+  const changeSlider = async val => {
+    setBeingAltered(true)
+    await sound.current.setPositionAsync(duration * val)
+    setBeingAltered(false)
+  } 
 
   const changeTitle = async ({ nativeEvent: { text }}) => {
     const newRecordings = [...recordings]
@@ -109,53 +127,70 @@ const Recording = ({data: { title, date, duration, uri }, index}) => {
   }
 
   return (
-    <Container onPress={() => dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index })}>
-      <Info>
-        <Title
-          onEndEditing={changeTitle}
-          selectionColor={'#2159ca'}>
-            {title ? title : `New Recording ${index + 1}`}
-          </Title>
-        <InfoBottom>
-          <Date>{date}</Date>
-          <Duration>{formatDuration(duration)}</Duration>
-        </InfoBottom>
-      </Info>
-        <Drawer style={{ 
-          height: drawerHeight, 
-          paddingTop: drawerPadding, 
-          paddingBottom: drawerPadding, 
-          opacity: drawerOpacity
-        }}>
-          <Slider
-          style={{width: '100%', height: 10}}
-          minimumValue={0}
-          maximumValue={1}
-          value={position}
-          minimumTrackTintColor="#ddd"
-          maximumTrackTintColor="#444"
-          thumbTintColor='#ddd'
-          onValueChange={value => {
-            console.log(value)
-          }}
-        />
-        <Buttons>
-          <PlayButton 
-            activeOpacity={.7}
-            onPress={() => !isStarted || isPaused ? playRecording() : pauseRecording()}
-          >
-            <Ionicons name={ !isStarted || isPaused ? 'md-play' : 'md-pause'} size={28} color="white" />
-          </PlayButton>
-          <DeleteButton 
-            activeOpacity={.7}
-            onPress={() => !isStarted || isPaused ? playRecording() : pauseRecording()}
-          >
-            <Ionicons name="md-trash" size={28} color="#2159ca" />
-          </DeleteButton>
-        </Buttons>
-      {/* <Text style={{ color: 'white' }}>started: {started ? 'true' : 'false' }, paused: {paused ? 'true' : 'false' }, loaded: {loaded ? 'true' : 'false' }</Text> */}
-      </Drawer>
-    </Container>
+    <>
+      <Modal visible={modalVisible}>
+          <ModalMessage>Delete this recording?</ModalMessage>
+          <ModalWarning>This action is irreversible.</ModalWarning>
+          <ModalButtons>
+            <ModalButton 
+              style={{ borderRightWidth: 1 }}
+              activeOpacity={.9}
+              onPress={() => deleteRecording()}>
+              <ModalButtonText>Delete</ModalButtonText>
+            </ModalButton>
+            <ModalButton
+              activeOpacity={.9}
+              onPress={() => setModalVisible(false)}>
+              <ModalButtonText>Cancel</ModalButtonText>
+            </ModalButton>
+          </ModalButtons>
+        </Modal>
+      <Container onPress={() => dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index })}>
+        <Info>
+          <Title
+            onEndEditing={changeTitle}
+            selectionColor={'#2159ca'}>
+              {title ? title : `New Recording ${index + 1}`}
+            </Title>
+          <InfoBottom>
+            <Date>{date}</Date>
+            <Duration>{formatDuration(duration)}</Duration>
+          </InfoBottom>
+        </Info>
+          <Drawer style={{ 
+            height: drawerHeight, 
+            paddingTop: drawerPadding, 
+            paddingBottom: drawerPadding, 
+            opacity: drawerOpacity
+          }}>
+            <Slider
+            style={{width: '100%', height: 10}}
+            minimumValue={0}
+            maximumValue={1}
+            value={position}
+            minimumTrackTintColor="#ddd"
+            maximumTrackTintColor="#444"
+            thumbTintColor='#ddd'
+            onSlidingComplete={changeSlider}
+          />
+          <Buttons>
+            <PlayButton 
+              activeOpacity={.7}
+              onPress={() => !isStarted || isPaused ? playRecording() : pauseRecording()}
+            >
+              <Ionicons name={ !isStarted || isPaused ? 'md-play' : 'md-pause'} size={28} color="white" />
+            </PlayButton>
+            <DeleteButton 
+              activeOpacity={.7}
+              onPress={() => setModalVisible(true)}
+            >
+              <Ionicons name="md-trash" size={28} color="#2159ca" />
+            </DeleteButton>
+          </Buttons>
+        {/* <Text style={{ color: 'white' }}>started: {started ? 'true' : 'false' }, paused: {paused ? 'true' : 'false' }, loaded: {loaded ? 'true' : 'false' }</Text> */}
+        </Drawer>
+      </Container>
+    </>
   )
 }
 
