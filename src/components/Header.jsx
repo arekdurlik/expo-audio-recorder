@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { TouchableOpacity, Modal } from 'react-native'
 import styled from 'styled-components/native'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useRecordingState } from '../RecordingContext'
 
-const Header = ({ recordings, onDelete }) => {
+const Header = () => {
+  const [{ recordings }, dispatch] = useRecordingState()
   const [modalVisible, setModalVisible] = useState(false)
 
   const handleDelete = () => {
-    onDelete()
+    dispatch({ type: 'SET_RECORDINGS', payload: [] })
     setModalVisible(false)
   }
 

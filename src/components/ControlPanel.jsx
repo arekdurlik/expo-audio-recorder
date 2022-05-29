@@ -6,9 +6,11 @@ import { Audio } from 'expo-av'
 import { clamp, formatDuration, formatDate } from '../helpers'
 import styled from 'styled-components/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useRecordingState } from '../RecordingContext'
 
 
-const ControlPanel = ({ recordings, setRecordings, recording, setRecording }) => {
+const ControlPanel = () => {
+  const [{ recordings, recording }, dispatch] = useRecordingState()
   const [recordingTime, setRecordingTime] = useState(0)
   const recordingData = useRef(new Array(18).fill(0))
   const borderRadius = useRef(new Animated.Value(50)).current
@@ -69,7 +71,7 @@ const ControlPanel = ({ recordings, setRecordings, recording, setRecording }) =>
 
         recording.setProgressUpdateInterval(1)
 
-        setRecording(recording)
+        dispatch({ type: 'SET_RECORDING', payload: recording })
       } else {
           console.error('permissions not granted: ', err)
       }
@@ -79,7 +81,8 @@ const ControlPanel = ({ recordings, setRecordings, recording, setRecording }) =>
   }
 
   const stopRecording = async () => {
-    setRecording(undefined)
+    dispatch({ type: 'SET_RECORDING', payload: undefined })
+
     try {
       await recording.stopAndUnloadAsync()
     } catch (err) {
@@ -99,7 +102,7 @@ const ControlPanel = ({ recordings, setRecordings, recording, setRecording }) =>
     
     await AsyncStorage.setItem('recordings', JSON.stringify(newRecordings))
     
-    setRecordings(newRecordings)
+    dispatch({ type: 'SET_RECORDINGS', payload: newRecordings})
     recordingData.current = new Array(18).fill(0)
   }
 

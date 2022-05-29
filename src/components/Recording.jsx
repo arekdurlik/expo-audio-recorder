@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
-import { Animated, TouchableOpacity, View } from 'react-native'
+import { Animated } from 'react-native'
 import { Audio } from 'expo-av'
 import { formatDuration } from '../helpers'
 import styled from 'styled-components/native'
 import Slider from '@react-native-community/slider'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useRecordingState } from '../RecordingContext'
 
-const Recording = ({data: { title, date, duration, uri }, index, recording, activeRecording, setActiveRecording}) => {
+const Recording = ({data: { title, date, duration, uri }, index}) => {
+  const [{ recording, activeRecording }, dispatch] = useRecordingState()
   const [isLoaded, setLoaded]   = useState(false)
   const [isStarted, setStarted] = useState(false)
   const [isPaused, setPaused]   = useState(false)
@@ -70,13 +72,11 @@ const Recording = ({data: { title, date, duration, uri }, index, recording, acti
     await sound.current.unloadAsync()
     setLoaded(false)
   }
-
-  
   
   const playRecording = async () => {
     if (!isLoaded) {
       await sound.current.loadAsync({ uri }, { shouldPlay: true })
-      setActiveRecording(index)
+      dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index})
       setLoaded(true)
     }
     
@@ -101,7 +101,7 @@ const Recording = ({data: { title, date, duration, uri }, index, recording, acti
   }
 
   return (
-    <Container onPress={() => setActiveRecording(index)}>
+    <Container onPress={() => dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index })}>
       <Info>
         <Title
           onSubmitEditing={({text}) => console.log(text)}
