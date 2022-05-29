@@ -101,11 +101,9 @@ const Recording = ({data: { title, date, duration, uri }, index}) => {
   }
 
   const changeTitle = async ({ nativeEvent: { text }}) => {
-    console.log('submit: ', text)
     const newRecordings = [...recordings]
-    let newRecording = {...newRecordings[index]}
-    newRecording.title = text
-    
+    newRecordings[index] = {...newRecordings[index], title: text}
+
     await storeRecordingsAsync(newRecordings)
     dispatch({ type: 'SET_RECORDINGS', payload: newRecordings })
   }

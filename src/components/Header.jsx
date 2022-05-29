@@ -5,11 +5,12 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
 
 const Header = () => {
-  const [{ recordings }] = useRecordingState()
+  const [{ recordings }, dispatch] = useRecordingState()
   const [modalVisible, setModalVisible] = useState(false)
 
   const handleDelete = () => {
     storeRecordingsAsync([])
+    dispatch({ type: 'SET_RECORDINGS', payload: [] })
     setModalVisible(false)
   }
 
