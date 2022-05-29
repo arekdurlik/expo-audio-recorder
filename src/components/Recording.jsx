@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Animated, TouchableOpacity, View } from 'react-native'
 import { Audio } from 'expo-av'
+import { formatDuration } from '../helpers'
 import styled from 'styled-components/native'
 import Slider from '@react-native-community/slider'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import moment from 'moment'
 
 const Recording = ({data: { title, date, duration, uri }, index, recording, activeRecording, setActiveRecording}) => {
   const [isLoaded, setLoaded]   = useState(false)
@@ -13,10 +13,10 @@ const Recording = ({data: { title, date, duration, uri }, index, recording, acti
   const [isActive, setActive]   = useState(false)
   const [position, setPosition] = useState(0)
 
-  const sound = useRef(new Audio.Sound())
-  const drawerHeight = useRef(new Animated.Value(0)).current
+  const drawerHeight  = useRef(new Animated.Value(0)).current
   const drawerPadding = useRef(new Animated.Value(0)).current
   const drawerOpacity = useRef(new Animated.Value(0)).current
+  const sound = useRef(new Audio.Sound())
 
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -27,26 +27,26 @@ const Recording = ({data: { title, date, duration, uri }, index, recording, acti
   useEffect(() => {
     if (isActive) {
       Animated.parallel([
-        Animated.timing(drawerHeight, { toValue: 70, duration: 200, useNativeDriver: false }),
-        Animated.timing(drawerPadding, { toValue: 15, duration: 200, useNativeDriver: false }),
-        Animated.timing(drawerOpacity, { toValue: 1, duration: 200, useNativeDriver: false })
+        Animated.timing(drawerHeight, { toValue: 100, duration: 150, useNativeDriver: false }),
+        Animated.timing(drawerPadding, { toValue: 15, duration: 150, useNativeDriver: false }),
+        Animated.timing(drawerOpacity, { toValue: 1, duration: 300, useNativeDriver: false })
       ]).start()
     } else {
       Animated.parallel([
-        Animated.timing(drawerHeight, { toValue: 0, duration: 200, useNativeDriver: false }),
-        Animated.timing(drawerPadding, { toValue: 0, duration: 200, useNativeDriver: false }),
-        Animated.timing(drawerOpacity, { toValue: 0, duration: 200, useNativeDriver: false })
+        Animated.timing(drawerHeight, { toValue: 0, duration: 150, useNativeDriver: false }),
+        Animated.timing(drawerPadding, { toValue: 0, duration: 150, useNativeDriver: false }),
+        Animated.timing(drawerOpacity, { toValue: 0, duration: 300, useNativeDriver: false })
       ]).start()
     }
 
   }, [isActive])
   
-  //unload sound if user has started recording
+  //unload the sound if the user has started recording
   useEffect(() => {
     if (isLoaded && recording) unloadSound()
   }, [recording])
-
-  //unload every sound that is currently loaded if it's not the one that the user has just activated
+  
+  //unload every sound that is currently loaded if it's not the one that user has just activated
   useEffect(() => {
     if (index != activeRecording) {
       if (isLoaded) unloadSound()
@@ -71,13 +71,7 @@ const Recording = ({data: { title, date, duration, uri }, index, recording, acti
     setLoaded(false)
   }
 
-  const formatDuration = millis => {
-    const minutes = millis / 1000 / 60
-    const minutesDisplay = ('0' + Math.floor(minutes)).slice(-2) // prepend zero
-    const seconds = Math.round((minutes - minutesDisplay) * 60)
-    const secondsDisplay = seconds < 10 ? `0${seconds}` : seconds
-    return `${minutesDisplay}:${secondsDisplay}`
-  }
+  
   
   const playRecording = async () => {
     if (!isLoaded) {
@@ -109,9 +103,13 @@ const Recording = ({data: { title, date, duration, uri }, index, recording, acti
   return (
     <Container onPress={() => setActiveRecording(index)}>
       <Info>
-        <Title>{title ? title : `Recording ${index + 1}`}</Title>
+        <Title
+          onSubmitEditing={({text}) => console.log(text)}
+          selectionColor={'#2159ca'}>
+            {title ? title : `New Recording ${index + 1}`}
+          </Title>
         <InfoBottom>
-          <Date>{moment(date).format('DD MMM YYYY')}</Date>
+          <Date>{date}</Date>
           <Duration>{formatDuration(duration)}</Duration>
         </InfoBottom>
       </Info>
@@ -138,13 +136,13 @@ const Recording = ({data: { title, date, duration, uri }, index, recording, acti
             activeOpacity={.7}
             onPress={() => !isStarted || isPaused ? playRecording() : pauseRecording()}
           >
-            <Ionicons name={ !isStarted || isPaused ? 'md-play' : 'md-pause'} size={32} color="white" />
+            <Ionicons name={ !isStarted || isPaused ? 'md-play' : 'md-pause'} size={28} color="white" />
           </PlayButton>
           <DeleteButton 
             activeOpacity={.7}
             onPress={() => !isStarted || isPaused ? playRecording() : pauseRecording()}
           >
-            <Ionicons name="md-trash" size={32} color="#2159ca" />
+            <Ionicons name="md-trash" size={28} color="#2159ca" />
           </DeleteButton>
         </Buttons>
       {/* <Text style={{ color: 'white' }}>started: {started ? 'true' : 'false' }, paused: {paused ? 'true' : 'false' }, loaded: {loaded ? 'true' : 'false' }</Text> */}
@@ -158,7 +156,7 @@ export default Recording
 const Container = styled.Pressable`
   position: relative;
   flex-direction: column;
-  min-height: 50px;
+  min-height: 55px;
   width: 100%;
   justify-content: space-between;
   align-items: center;
@@ -170,9 +168,9 @@ const Container = styled.Pressable`
 const Info = styled.View`
   justify-content: space-between;
   width: 100%;
-  height: 50px;
+  height: 55px;
 `
-const Title = styled.Text`
+const Title = styled.TextInput`
   width: 100%;
   font-size: 18px;
   font-weight: 600;
@@ -198,21 +196,20 @@ const Drawer = styled(Animated.View)`
   align-items: center;
   height: 0px;
   width: 100%;
-
-  overflow: hidden;
 `
 
 const Buttons = styled.View`
-position: absolute;
+  position: absolute;
   flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
   width: 100%;
   bottom: 0;
   height: 100%;
 `
 
 const PlayButton = styled.TouchableOpacity`
-  justify-content: center;
-  margin: auto;
+  align-self: flex-end;
 `
 
 const DeleteButton = styled.TouchableOpacity`

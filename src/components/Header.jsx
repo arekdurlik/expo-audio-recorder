@@ -3,7 +3,7 @@ import { TouchableOpacity, Modal } from 'react-native'
 import styled from 'styled-components/native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-const Header = ({ onDelete }) => {
+const Header = ({ recordings, onDelete }) => {
   const [modalVisible, setModalVisible] = useState(false)
 
   const handleDelete = () => {
@@ -18,7 +18,7 @@ const Header = ({ onDelete }) => {
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
+          Alert.alert('Modal has been closed.')
           setModalVisible(!modalVisible);
         }}>
         <ModalBackground>
@@ -39,12 +39,14 @@ const Header = ({ onDelete }) => {
       </Modal>
       <Container>
         <Title>All Recordings</Title>
-        <TouchableOpacity 
-          activeOpacity={.7}
-          onPress={() => setModalVisible(true)}
-        >
-          <Ionicons name="md-trash" size={28} color="#2159ca" />
-        </TouchableOpacity>
+        {recordings.length > 0 && (
+          <TouchableOpacity 
+            activeOpacity={.7}
+            onPress={() => setModalVisible(true)}
+          >
+            <Ionicons name="md-trash" size={28} color="#2159ca" />
+          </TouchableOpacity>
+        )}
       </Container>
     </>
   )

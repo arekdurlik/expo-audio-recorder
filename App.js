@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { StatusBar, View, ScrollView} from 'react-native'
+import { StatusBar, View, ScrollView } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import styled from 'styled-components/native'
 
@@ -25,7 +26,7 @@ export default function App() {
         setRecordings(data)
       }
     } catch(err) {
-      console.log('get recordings error: ', err)
+      console.error('get recordings error: ', err)
     }
   }
 
@@ -35,28 +36,31 @@ export default function App() {
   }
 
   return (
-    <>
+    <View>
       <StatusBar 
         translucent 
         backgroundColor="transparent"
         barStyle="light-content"
-      />
+        />
         <DarkAreaView>
+        <Gradient />
           <ScrollView overScrollMode='never'>
-            <Header onDelete={() => clearStorage()} />
+            <Header 
+              recordings={recordings}
+              onDelete={() => clearStorage()} />
             <View>
               {recordings.map((elem, index) => {
                 return (
                   <Recording 
                     data={elem} 
                     index={index} 
-                    key={index} 
+                    key={elem.uri} 
                     recording={recording}
                     activeRecording={activeRecording}
                     setActiveRecording={() => setActiveRecording(index)}
                   />
                 )
-              })}
+              }).reverse()}
             </View>
           </ScrollView>
         </DarkAreaView>
@@ -67,7 +71,7 @@ export default function App() {
           setRecording={recording => setRecording(recording)}
           handlePress={() => {  }} 
         />
-    </>
+    </View>
   )
 }
 
@@ -75,5 +79,17 @@ const DarkAreaView = styled.SafeAreaView`
   padding-top: 10px;
   background-color: #000;
   height: 85%;
-  padding-bottom: 15px;
+  margin-bottom: 25%;
+`
+
+const Gradient = styled(LinearGradient).attrs({
+  colors: ['rgb(0,0,0)', 'transparent'],
+  start: { x: 0, y: 0 },
+  end: { x: 0, y: 1 },
+ })`
+  height: 50px;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  z-index: 999;
 `
