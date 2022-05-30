@@ -2,9 +2,10 @@
   "main": {
     "title": "All Recordings"
   },
+  "search": "Search",
   "recording": {
     "delete": {
-      "message":  "Delete this recording?",
+      "message": "Delete this recording?",
       "warning": "This action is irreversible"
     },
     "deleteAll": {
@@ -18,18 +19,22 @@
     "cancel": "Cancel",
     "delete": "Delete"
   },
-  "months": {
-    "january": "January",
-    "february": "February",
-    "march": "March",
-    "april": "April",
-    "may": "May",
-    "june": "June",
-    "july": "July",
-    "august": "August",
-    "september": "September",
-    "october": "October",
-    "november": "November",
-    "december": "December"
+  "date": {
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "prependZero": true,
+    "format": "{{day} {{month}} {{year}} {{hours}}:{{minutes}}"
   }
 }

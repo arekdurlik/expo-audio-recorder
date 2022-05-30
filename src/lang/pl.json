@@ -2,6 +2,7 @@
   "main": {
     "title": "Wszystkie nagrania"
   },
+  "search": "Szukaj",
   "recording": {
     "delete": {
       "message": "Usunąć nagranie?",
@@ -14,22 +15,26 @@
     "defaultTitle": "Nowe nagranie"
   },
   "modal": {
-    "confirm": "Gitówa",
+    "confirm": "Zatwierdź",
     "cancel": "Jednak nie chcę",
     "delete": "Usuń"
   },
-  "months": {
-    "january": "stycznia",
-    "february": "lutego",
-    "march": "marca",
-    "april": "kwietnia",
-    "may": "maja",
-    "june": "czerwca",
-    "july": "lipca",
-    "august": "sierpnia",
-    "september": "września",
-    "october": "października",
-    "november": "listopada",
-    "december": "grudnia"
+  "date": {
+    "months": {
+      "january": "stycznia",
+      "february": "lutego",
+      "march": "marca",
+      "april": "kwietnia",
+      "may": "maja",
+      "june": "czerwca",
+      "july": "lipca",
+      "august": "sierpnia",
+      "september": "września",
+      "october": "października",
+      "november": "listopada",
+      "december": "grudnia"
+    },
+    "prependZero": true,
+    "format": "{{day}} {{month}} {{year}} {{hours}}:{{minutes}}"
   }
 }

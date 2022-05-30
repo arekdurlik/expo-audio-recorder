@@ -12,23 +12,31 @@ export const formatDuration = millis => {
 
 export const formatDate = string => {
   const date = new Date(string)
+
   const months = [
-    i18n.t('months.january'),
-    i18n.t('months.february'),
-    i18n.t('months.march'),
-    i18n.t('months.april'),
-    i18n.t('months.may'),
-    i18n.t('months.june'),
-    i18n.t('months.july'),
-    i18n.t('months.august'),
-    i18n.t('months.september'),
-    i18n.t('months.october'),
-    i18n.t('months.november'),
-    i18n.t('months.december'),
+    i18n.t('date.months.january'),
+    i18n.t('date.months.february'),
+    i18n.t('date.months.march'),
+    i18n.t('date.months.april'),
+    i18n.t('date.months.may'),
+    i18n.t('date.months.june'),
+    i18n.t('date.months.july'),
+    i18n.t('date.months.august'),
+    i18n.t('date.months.september'),
+    i18n.t('date.months.october'),
+    i18n.t('date.months.november'),
+    i18n.t('date.months.december'),
   ]
-  const day = `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
-  const time = `${('0' +  date.getHours()).slice(-2)}:${('0' +  date.getMinutes()).slice(-2)}` // prepend zero
-  return `${day} ${time}`
+
+  const formatted = i18n.t('date.format', { 
+    year: date.getFullYear(),
+    month: months[date.getMonth()],
+    day: i18n.t('date.prependZero') ? ('0' + date.getDate()).slice(-2) : date.getDate(),
+    hours: ('0' + date.getHours()).slice(-2),
+    minutes: ('0' + date.getMinutes()).slice(-2)
+  })
+  
+  return formatted
 }
 
 export const getNextId = recordings => {

@@ -1,0 +1,40 @@
+{
+  "main": {
+    "title": "すべての録音"
+  },
+  "search": "検索",
+  "recording": {
+    "delete": {
+      "message": "この録音を削除しますか?",
+      "warning": "ファイルを削除すると元に戻すことはできません。"
+    },
+    "deleteAll": {
+      "message": "全録音を削除しますか?",
+      "warning": "ファイルを削除すると元に戻すことはできません。"
+    },
+    "defaultTitle": "新規録音"
+  },
+  "modal": {
+    "confirm": "OK",
+    "cancel": "キャンセル",
+    "delete": "削除"
+  },
+  "date": {
+    "months": {
+      "january": "1",
+      "february": "2",
+      "march": "3",
+      "april": "4",
+      "may": "5",
+      "june": "6",
+      "july": "7",
+      "august": "8",
+      "september": "9",
+      "october": "10",
+      "november": "11",
+      "december": "12"
+    },
+    "prependZero" : false,
+    "format": "{{year}}年{{month}}月{{day}}日 {{hours}}:{{minutes}}"
+  }
+}
