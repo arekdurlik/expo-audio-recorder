@@ -218,22 +218,21 @@ const Controls = styled.View`
   `
 
 const RecordButtonOutline = styled.View`
-  height: 67px;
-  width: 67px;
+  height: 68px;
+  width: 68px;
   justify-content: center;
   align-items: center;
   background-color: rgba(0,0,0,0.5);
-  border-width: 5px;
+  border-width: 4px;
   border-color: #aaa;
   border-radius: 9999px;
 
   `
 
 const RecordButton = styled.TouchableOpacity`
-  position: absolute;
   background-color: #bb0000;
   transition: 1ms ease-in-out;
-  height: 60px;
-  width: 60px;
+  height: 55px;
+  width: 55px;
   border-radius: 999px;
   `

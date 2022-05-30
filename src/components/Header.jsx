@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { TouchableOpacity } from 'react-native'
+import { useRef, useState } from 'react'
+import { Animated, TouchableOpacity } from 'react-native'
 import styled from 'styled-components/native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
@@ -43,7 +43,7 @@ const Header = () => {
             activeOpacity={.7}
             onPress={() => setModalVisible(true)}
           >
-            <Ionicons name="md-trash" size={28} color="#2159ca" />
+            <Ionicons name="md-trash-outline" size={28} color="#2159ca" />
           </TouchableOpacity>
         )}
       </Container>
@@ -57,12 +57,12 @@ const Container = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 40px 15px 15px 15px;
+  padding: 60px 15px 0px 15px;
 `
 
 const Title = styled.Text`
   font-size: 30px;
   color: #ddd;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.5px;
 `

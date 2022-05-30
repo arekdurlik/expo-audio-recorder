@@ -8,7 +8,8 @@ import i18n from 'i18n-js'
 import Recording from './components/Recording'
 import Header from './components/Header'
 import ControlPanel from './components/ControlPanel'
-import { useRecordingState, getRecordingsAsync } from './RecordingContext'
+import { initialRecordings } from './helpers'
+import { useRecordingState, getRecordingsAsync, storeRecordingsAsync } from './RecordingContext'
 
 const Home = () => {
   const [{ recordings, recording }, dispatch] = useRecordingState()
@@ -18,7 +19,10 @@ const Home = () => {
   const searchInput = useRef(null)
   
   useEffect(() => {
-    getRecordings()
+    //getRecordings()
+    storeRecordingsAsync(initialRecordings)
+    dispatch({ type: 'SET_RECORDINGS', payload: initialRecordings })
+
   }, [])
 
   useEffect(() => {
@@ -71,9 +75,11 @@ const Home = () => {
               selectionColor={'#2159ca'}
               spellCheck={false}
               autoCorrect={false}
+              placeholder={i18n.t('search')}
+              placeholderTextColor="#666" 
             />
               <SearchIcon />
-              {searching && (
+              {searchTerm.length > 0 && (
                 <SearchCancelButton onPress={clearSearch}>
                   <SearchCancelIcon/>
                 </SearchCancelButton>
@@ -122,29 +128,29 @@ const Gradient = styled(LinearGradient).attrs({
 const SearchBar = styled.ScrollView`
   position: relative;
   width: 100%;
-  padding: 0 15px;
+  padding: 0 15px 5px 15px;
 `
 
 const SearchIcon = styled(Ionicons).attrs({
   name: 'md-search',
-  size: 20
+  size: 18
 })`
   position: absolute;
-  left: 20px;
-  color: #777;
+  left: 5px;
+  color: #666;
 `
 
 const SearchInput = styled.TextInput`
-  background-color: #444;
+  background-color: #222;
   color: #ddd;
-  margin: 10px 10px 10px 10px;
-  padding: 0 35px;
-  border-radius: 10px;
+  margin: 8px 0 10px 0;
+  padding: 0 30px;
+  border-radius: 5px;
 `
 
 const SearchCancelButton = styled.TouchableOpacity`
   position: absolute;
-  right: 20px;
+  right: 5px;
   overflow: hidden;
   justify-content: center;
   align-items: center;

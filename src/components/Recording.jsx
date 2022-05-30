@@ -39,7 +39,10 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
       Animated.parallel([
         Animated.timing(drawerHeight, { toValue: 100, duration: 300, useNativeDriver: false }),
         Animated.timing(drawerPadding, { toValue: 15, duration: 300, useNativeDriver: false }),
-        Animated.timing(drawerOpacity, { toValue: 1, duration: 150, useNativeDriver: false })
+        Animated.sequence([
+          Animated.delay(100),
+          Animated.timing(drawerOpacity, { toValue: 1, duration: 200, useNativeDriver: false })
+        ])
       ]).start()
     } else {
       Animated.parallel([
@@ -48,7 +51,6 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
         Animated.timing(drawerOpacity, { toValue: 0, duration: 150, useNativeDriver: false })
       ]).start()
     }
-
   }, [isActive])
   
   //unload the sound if the user has started recording
@@ -76,7 +78,6 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
     if (!isStarted) await sound.current.setPositionAsync(0)
 
     await sound.current.setProgressUpdateIntervalAsync(1)
-    await sound.current.setRateAsync(0.5)
     await sound.current.playAsync()
     setStarted(true)
     setPaused(false)
@@ -97,13 +98,13 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
   }
 
   const skipForward = async () => {
-    await sound.current.setPositionAsync((duration * position.current) + 10000)
-    sliderRef.current.setNativeProps({ value: position.current - (10000 / duration) })
+    await sound.current.setPositionAsync((duration * position.current) + 5000)
+    sliderRef.current.setNativeProps({ value: position.current - (5000 / duration) })
   }
 
   const skipBackward = async () => {
-    await sound.current.setPositionAsync((duration * position.current) - 10000)
-    sliderRef.current.setNativeProps({ value: position.current - (10000 / duration) })
+    await sound.current.setPositionAsync((duration * position.current) - 5000)
+    sliderRef.current.setNativeProps({ value: position.current - (5000 / duration) })
   }
 
   const deleteRecording = async () => {
@@ -174,31 +175,32 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
             onEndEditing={changeTitle}
             selectionColor={'#2159ca'}
             autoCorrect={false}
+            editable={index === activeRecording}
           >
             {title ? title : `${i18n.t('recording.defaultTitle')} ${id}`}
           </Title>
           <InfoBottom>
-            <Date>{formatDate(date)}</Date>
+            <Date>{formatDate('date.format', date)}</Date>
             <Duration>{formatDuration(duration)}</Duration>
           </InfoBottom>
         </Info>
-          <Drawer style={{ 
-            height: drawerHeight, 
-            paddingTop: drawerPadding, 
-            paddingBottom: drawerPadding, 
-            opacity: drawerOpacity}}
-          >
-            <Slider
+        <Drawer style={{ 
+          height: drawerHeight, 
+          paddingTop: drawerPadding, 
+          paddingBottom: drawerPadding, 
+          opacity: drawerOpacity}}
+        >
+          <Slider
             ref={sliderRef}
-            style={{width: '100%', height: 0}}
+            style={{width: '100%', height: 20}}
             minimumValue={0}
             maximumValue={1}
             minimumTrackTintColor="#ddd"
             maximumTrackTintColor="#777"
             thumbTintColor='#ddd'
             onSlidingComplete={changeSlider}
-          />
-          <Buttons>
+          /> 
+          <Buttons pointerEvents={activeRecording === index ? 'auto' : 'none' }>
             <ShareButton 
               activeOpacity={.7}
               onPress={shareRecording}
@@ -209,26 +211,27 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
               activeOpacity={.7}
               onPress={skipBackward}
             >
-              <MaterialIcons name="replay-5" size={38} color="#ddd" />
+              <MaterialIcons name="replay-5" size={32} color="#ddd" />
             </ReplayButton>
             <PlayButton 
               activeOpacity={.7}
               onPress={() => !isStarted || isPaused ? playRecording() : pauseRecording()}
             >
-              <Ionicons name={ !isStarted || isPaused ? 'md-play' : 'md-pause'} size={38} color="#ddd" />
+              <Ionicons 
+                name={ !isStarted || isPaused ? 'md-play' : 'md-pause'} size={32} color="#ddd" />
             </PlayButton>
             <ForwardButton 
               activeOpacity={.7}
               onPress={skipForward}
             >
-              <MaterialIcons name="forward-5" size={38} color="#ddd" />
+              <MaterialIcons name="forward-5" size={32} color="#ddd" />
             </ForwardButton>
 
             <DeleteButton 
               activeOpacity={.7}
               onPress={() => setModalVisible(true)}
             >
-              <Ionicons name="md-trash" size={28} color="#2159ca" />
+              <Ionicons name="md-trash-outline" size={28} color="#2159ca" />
             </DeleteButton>
           </Buttons>
         </Drawer>
@@ -246,9 +249,9 @@ const Container = styled.Pressable`
   width: 100%;
   justify-content: space-between;
   align-items: center;
-  border-bottom-width: 1px;
+  border-top-width: 1px;
   border-color: #222;
-  padding: 10px 15px;
+  padding: 10px 15px 10px 15px;
 `
 
 const Info = styled.View`
@@ -257,12 +260,11 @@ const Info = styled.View`
   height: 55px;
 `
 const Title = styled.TextInput`
+  width: 100%;
   align-self: flex-start;
   font-size: 18px;
   font-weight: 600;
   color: white;
-  display: flex;
-  justify-content: flex-start;
 `
 
 const InfoBottom = styled.View`
@@ -305,7 +307,7 @@ const ForwardButton = styled.TouchableOpacity`
 
 const PlayButton = styled.TouchableOpacity`
   align-self: flex-end;
-  margin: 0 10px;
+  margin: 0 25px;
 `
 const ReplayButton = styled.TouchableOpacity`
   align-self: flex-end;

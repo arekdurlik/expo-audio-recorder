@@ -10,7 +10,7 @@ export const formatDuration = millis => {
   return `${minutesDisplay}:${secondsDisplay}`
 }
 
-export const formatDate = string => {
+export const formatDate = (format, string) => {
   const date = new Date(string)
 
   const months = [
@@ -28,7 +28,7 @@ export const formatDate = string => {
     i18n.t('date.months.december'),
   ]
 
-  const formatted = i18n.t('date.format', { 
+  const formatted = i18n.t(format, { 
     year: date.getFullYear(),
     month: months[date.getMonth()],
     day: i18n.t('date.prependZero') ? ('0' + date.getDate()).slice(-2) : date.getDate(),
@@ -46,3 +46,27 @@ export const getNextId = recordings => {
 
   return newIndex
 }
+
+export const initialRecordings = [
+  {
+    id: 1,
+    title: null,
+    duration: 2580,
+    date: new Date('May 27, 2022 16:12:20'),
+    uri: null,
+  },
+  {
+    id: 2,
+    title: null,
+    duration: 15000,
+    date: new Date('May 29, 2022 03:24:00'),
+    uri: null,
+  },
+  {
+    id: 3,
+    title: 'Test Recording',
+    duration: 125000,
+    date: new Date('May 30, 2022 07:43:00'),
+    uri: null,
+  }
+]
