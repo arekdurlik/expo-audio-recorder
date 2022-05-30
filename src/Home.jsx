@@ -46,7 +46,7 @@ const Home = () => {
   }
 
   return (
-    <View>
+    <View style={{ flex: 1, backgroundColor: 'black' }}>
       <StatusBar 
         translucent 
         backgroundColor="transparent"
@@ -67,6 +67,7 @@ const Home = () => {
               ref={searchInput}
               onChangeText={setSearchTerm}
               onFocus={() => setSearching(true)}
+              onBlur={() => setSearching(false)}
               selectionColor={'#2159ca'}
               spellCheck={false}
               autoCorrect={false}

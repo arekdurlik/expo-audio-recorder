@@ -10,11 +10,10 @@ const initialState = {
   activeRecording: null
 }
 
-export const recordingStateReducer = (state, action) => {
+const recordingStateReducer = (state, action) => {
   switch (action.type) {
     case 'SET_RECORDINGS':
       const recordings = action.payload
-      
       return {...state, recordings }
     
     case 'SET_RECORDING':
@@ -25,6 +24,16 @@ export const recordingStateReducer = (state, action) => {
       const activeRecording = action.payload
       return {...state, activeRecording}
     }
+}
+
+const RecordingStateProvider = ({ children }) => {
+  const [state, dispatch] = useReducer(recordingStateReducer, initialState)
+
+  return (
+      <RecoringStateCTX.Provider value={[state, dispatch]}>
+        {children}
+      </RecoringStateCTX.Provider>
+  )
 }
 
 export const getRecordingsAsync = async () => {
@@ -44,21 +53,11 @@ export const getRecordingsAsync = async () => {
 
 export const storeRecordingsAsync = async recordings => {
   try {
-    const payload = await JSON.stringify(recordings)
+    const payload = JSON.stringify(recordings)
     await AsyncStorage.setItem('recordings', payload)
   } catch (err) {
     console.log('store recordings in async storage error: ', err)
   }
-}
-
-const RecordingStateProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(recordingStateReducer, initialState)
-
-  return (
-      <RecoringStateCTX.Provider value={[state, dispatch]}>
-        {children}
-      </RecoringStateCTX.Provider>
-  )
 }
 
 export default RecordingStateProvider

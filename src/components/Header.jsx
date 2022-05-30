@@ -57,7 +57,7 @@ const Container = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 30px 15px 15px 15px;
+  padding: 40px 15px 15px 15px;
 `
 
 const Title = styled.Text`

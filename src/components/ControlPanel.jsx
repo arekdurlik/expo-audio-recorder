@@ -1,4 +1,3 @@
-
 import { useRef, useEffect, useState } from 'react'
 import { Animated } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -6,7 +5,6 @@ import { Audio } from 'expo-av'
 import { clamp, formatDuration, getNextId } from '../helpers'
 import styled from 'styled-components/native'
 import { useRecordingState, storeRecordingsAsync } from '../RecordingContext'
-
 
 const ControlPanel = () => {
   const [{ recordings, recording }, dispatch] = useRecordingState()
@@ -18,8 +16,8 @@ const ControlPanel = () => {
   const opacity = useRef(new Animated.Value(0)).current
 
   const backgroundColor = background.interpolate({
-    inputRange: [0, 0.75],
-    outputRange: ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.75)"]
+    inputRange: [0, 0.85],
+    outputRange: ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.85)"]
   })
   
   const text = opacity.interpolate({
@@ -32,7 +30,7 @@ const ControlPanel = () => {
     if (recording) {
       Animated.parallel([
         Animated.timing(opacity, { toValue: 1, duration: 500, useNativeDriver: false }),
-        Animated.timing(background, { toValue: 0.75, duration: 500, useNativeDriver: false }),
+        Animated.timing(background, { toValue: 0.85, duration: 500, useNativeDriver: false }),
         Animated.timing(scale, { toValue: 0.6, duration: 200, useNativeDriver: true }),
         Animated.timing(borderRadius, { toValue: 10, duration: 200, useNativeDriver: true })
       ]).start()
@@ -47,9 +45,10 @@ const ControlPanel = () => {
   }, [recording])
 
   const startRecording = async () => {
+    dispatch({ type: 'SET_ACTIVE_RECORDING', payload: null})
+    
     try {
       const permission = await Audio.requestPermissionsAsync()
-      dispatch({ type: 'SET_ACTIVE_RECORDING', payload: null})
 
       if (permission.status === 'granted') {
         await Audio.setAudioModeAsync({
@@ -66,10 +65,11 @@ const ControlPanel = () => {
             if (recordingData.current.length >= 18) recordingData.current.shift()
             recordingData.current.push(clamp(loudness, 0 , 100))
           }
+          
           setRecordingTime(durationMillis)
         })
 
-        recording.setProgressUpdateInterval(1)
+        recording.setProgressUpdateInterval(10)
 
         dispatch({ type: 'SET_RECORDING', payload: recording })
       } else {
@@ -218,8 +218,10 @@ const Controls = styled.View`
   `
 
 const RecordButtonOutline = styled.View`
-  height: 70px;
-  width: 70px;
+  height: 67px;
+  width: 67px;
+  justify-content: center;
+  align-items: center;
   background-color: rgba(0,0,0,0.5);
   border-width: 5px;
   border-color: #aaa;

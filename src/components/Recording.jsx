@@ -65,20 +65,6 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
     }
     setActive(true)
   }, [activeRecording])
-
-  const unloadSound = async () => {
-    setPaused(false)
-    setActive(false)
-
-    await sound.current.stopAsync()
-    setStarted(false)
-
-    await sound.current.setPositionAsync(0)
-    sliderRef.current.setNativeProps({ value: 0 })
-
-    await sound.current.unloadAsync()
-    setLoaded(false)
-  }
   
   const playRecording = async () => {
     if (!isLoaded) {
@@ -90,14 +76,17 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
     if (!isStarted) await sound.current.setPositionAsync(0)
 
     await sound.current.setProgressUpdateIntervalAsync(1)
+    await sound.current.setRateAsync(0.5)
     await sound.current.playAsync()
     setStarted(true)
     setPaused(false)
     
     sound.current.setOnPlaybackStatusUpdate(status => {
-      if (status.isPlaying && !isBeingAltered) 
+      if (status.isPlaying && !isBeingAltered) {
         sliderRef.current.setNativeProps({ value: status.positionMillis / status.durationMillis })
         position.current = status.positionMillis / status.durationMillis
+      }
+      
       if (status.didJustFinish) setStarted(false)
     })
   }
@@ -129,6 +118,19 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
 
   const shareRecording = async () => {
     await Sharing.shareAsync(uri)
+  }
+
+  const unloadSound = async () => {
+    setPaused(false)
+    setActive(false)
+
+    await sound.current.stopAsync()
+    setStarted(false)
+
+    await sound.current.setPositionAsync(0)
+
+    setLoaded(false)
+    await sound.current.unloadAsync()
   }
 
   const changeSlider = async val => {
@@ -170,9 +172,11 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
         <Info>
           <Title
             onEndEditing={changeTitle}
-            selectionColor={'#2159ca'}>
-              {title ? title : `${i18n.t('recording.defaultTitle')} ${id}`}
-            </Title>
+            selectionColor={'#2159ca'}
+            autoCorrect={false}
+          >
+            {title ? title : `${i18n.t('recording.defaultTitle')} ${id}`}
+          </Title>
           <InfoBottom>
             <Date>{formatDate(date)}</Date>
             <Duration>{formatDuration(duration)}</Duration>
@@ -182,15 +186,15 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
             height: drawerHeight, 
             paddingTop: drawerPadding, 
             paddingBottom: drawerPadding, 
-            opacity: drawerOpacity
-          }}>
+            opacity: drawerOpacity}}
+          >
             <Slider
             ref={sliderRef}
-            style={{width: '100%', height: 10}}
+            style={{width: '100%', height: 0}}
             minimumValue={0}
             maximumValue={1}
             minimumTrackTintColor="#ddd"
-            maximumTrackTintColor="#444"
+            maximumTrackTintColor="#777"
             thumbTintColor='#ddd'
             onSlidingComplete={changeSlider}
           />
@@ -219,7 +223,6 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
             >
               <MaterialIcons name="forward-5" size={38} color="#ddd" />
             </ForwardButton>
-            
 
             <DeleteButton 
               activeOpacity={.7}
