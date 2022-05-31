@@ -60,7 +60,7 @@ const ControlPanel = () => {
         )
 
         recording.setOnRecordingStatusUpdate(({ durationMillis, metering }) => {
-          const loudness = metering + 100 // around 0-100
+          const loudness = metering + 100
           if (typeof loudness === 'number' && !Number.isNaN(loudness)) {
             if (recordingData.current.length >= 18) recordingData.current.shift()
             recordingData.current.push(clamp(loudness, 0 , 100))

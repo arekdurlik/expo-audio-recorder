@@ -1,0 +1,40 @@
+{
+  "main": {
+    "title": ""
+  },
+  "search": "",
+  "recording": {
+    "delete": {
+      "message": "",
+      "warning": ""
+    },
+    "deleteAll": {
+      "message": "",
+      "warning": ""
+    },
+    "defaultTitle": ""
+  },
+  "modal": {
+    "confirm": "",
+    "cancel": "",
+    "delete": ""
+  },
+  "date": {
+    "months": {
+      "january": "",
+      "february": "",
+      "march": "",
+      "april": "",
+      "may": "",
+      "june": "",
+      "july": "",
+      "august": "",
+      "september": "",
+      "october": "",
+      "november": "",
+      "december": ""
+    },
+    "prependZero": false,
+    "format": ""
+  }
+}

@@ -3,11 +3,18 @@ import i18n from 'i18n-js'
 export const clamp = (val, min, max) => Math.min(Math.max(val, min), max)
 
 export const formatDuration = millis => {
-  const minutes = millis / 1000 / 60
-  const minutesDisplay = ('0' + Math.floor(minutes)).slice(-2) // prepend zero
-  const seconds = Math.round((minutes - minutesDisplay) * 60)
-  const secondsDisplay = seconds < 10 ? `0${seconds}` : seconds
-  return `${minutesDisplay}:${secondsDisplay}`
+  const hours = millis / (1000*60*60)
+  const absoluteHours = Math.floor(hours)
+  const hoursDisplay = absoluteHours > 0 ? `${('0' + absoluteHours).slice(-2)}:` : ''
+
+  const minutes = (hours - absoluteHours) * 60
+  const absoluteMinutes = Math.floor(minutes)
+  const minutesDisplay = `${('0' + absoluteMinutes).slice(-2)}:` // prepend zero
+
+  const seconds = (minutes - absoluteMinutes) * 60
+  const absoluteSeconds = Math.floor(seconds)
+  const secondsDisplay = ('0' + absoluteSeconds).slice(-2)
+  return `${hoursDisplay}${minutesDisplay}${secondsDisplay}`
 }
 
 export const formatDate = (format, string) => {
