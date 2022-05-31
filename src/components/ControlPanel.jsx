@@ -31,7 +31,7 @@ const ControlPanel = () => {
       Animated.parallel([
         Animated.timing(opacity, { toValue: 1, duration: 500, useNativeDriver: false }),
         Animated.timing(background, { toValue: 0.85, duration: 500, useNativeDriver: false }),
-        Animated.timing(scale, { toValue: 0.6, duration: 200, useNativeDriver: true }),
+        Animated.timing(scale, { toValue: 0.7, duration: 200, useNativeDriver: true }),
         Animated.timing(borderRadius, { toValue: 10, duration: 200, useNativeDriver: true })
       ]).start()
     } else {
@@ -218,8 +218,8 @@ const Controls = styled.View`
   `
 
 const RecordButtonOutline = styled.View`
-  height: 68px;
-  width: 68px;
+  height: 69px;
+  width: 69px;
   justify-content: center;
   align-items: center;
   background-color: rgba(0,0,0,0.5);
@@ -232,7 +232,7 @@ const RecordButtonOutline = styled.View`
 const RecordButton = styled.TouchableOpacity`
   background-color: #bb0000;
   transition: 1ms ease-in-out;
-  height: 55px;
-  width: 55px;
+  height: 54px;
+  width: 54px;
   border-radius: 999px;
   `

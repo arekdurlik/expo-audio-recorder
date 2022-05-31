@@ -49,7 +49,9 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
         Animated.timing(drawerHeight, { toValue: 0, duration: 300, useNativeDriver: false }),
         Animated.timing(drawerPadding, { toValue: 0, duration: 300, useNativeDriver: false }),
         Animated.timing(drawerOpacity, { toValue: 0, duration: 150, useNativeDriver: false })
-      ]).start()
+      ]).start(() => {
+        sliderRef.current.setNativeProps({ value: 0 })
+      })
     }
   }, [isActive])
   
@@ -69,16 +71,12 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
   }, [activeRecording])
   
   const playRecording = async () => {
-    if (!isLoaded) {
-      await sound.current.loadAsync({ uri }, { shouldPlay: true })
-      dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index})
-      setLoaded(true)
-    }
-    
+    if (!isLoaded) await loadSound()
     if (!isStarted) await sound.current.setPositionAsync(0)
 
     await sound.current.setProgressUpdateIntervalAsync(1)
     await sound.current.playAsync()
+
     setStarted(true)
     setPaused(false)
     
@@ -108,7 +106,7 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
   }
 
   const deleteRecording = async () => {
-    setActive(false)
+    if (isLoaded) unloadSound()
     const newRecordings = [...recordings]
     newRecordings.splice(index, 1)
     await storeRecordingsAsync(newRecordings)
@@ -121,21 +119,24 @@ const Recording = ({data: { title, date, duration, uri, id }, index}) => {
     await Sharing.shareAsync(uri)
   }
 
-  const unloadSound = async () => {
-    setPaused(false)
-    setActive(false)
+  const loadSound = async () => {
+    await sound.current.loadAsync({ uri }, { shouldPlay: true })
+    dispatch({ type: 'SET_ACTIVE_RECORDING', payload: index })
+    setLoaded(true)
+  }
 
-    await sound.current.stopAsync()
+  const unloadSound = async () => {
+    setLoaded(false)
+    setPaused(false)
     setStarted(false)
 
+    await sound.current.stopAsync()
     await sound.current.setPositionAsync(0)
-
-    setLoaded(false)
     await sound.current.unloadAsync()
   }
 
   const changeSlider = async val => {
-    setBeingAltered(true)
+    await sliderRef.current.setNativeProps({ value: val})
     await sound.current.setPositionAsync(duration * val)
     setBeingAltered(false)
   } 
@@ -299,22 +300,24 @@ const Buttons = styled.View`
 const ShareButton = styled.TouchableOpacity`
   position: absolute;
   left: 0;
-`
+  bottom: 1px;
+  `
 
 const ForwardButton = styled.TouchableOpacity`
   align-self: flex-end;
-`
+  `
 
 const PlayButton = styled.TouchableOpacity`
   align-self: flex-end;
   margin: 0 25px;
-`
+  `
 const ReplayButton = styled.TouchableOpacity`
   align-self: flex-end;
-`
+  `
 
 const DeleteButton = styled.TouchableOpacity`
   position: absolute;
   right: 0;
+  bottom: 1px;
 `
 

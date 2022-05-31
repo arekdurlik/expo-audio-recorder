@@ -46,27 +46,3 @@ export const getNextId = recordings => {
 
   return newIndex
 }
-
-export const initialRecordings = [
-  {
-    id: 1,
-    title: null,
-    duration: 2580,
-    date: new Date('May 27, 2022 16:12:20'),
-    uri: null,
-  },
-  {
-    id: 2,
-    title: null,
-    duration: 15000,
-    date: new Date('May 29, 2022 03:24:00'),
-    uri: null,
-  },
-  {
-    id: 3,
-    title: 'Test Recording',
-    duration: 125000,
-    date: new Date('May 30, 2022 07:43:00'),
-    uri: null,
-  }
-]

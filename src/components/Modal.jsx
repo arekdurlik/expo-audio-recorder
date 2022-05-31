@@ -57,9 +57,9 @@ export const ModalButtons = styled.View`
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
+  border-color: #cccccc;
   border-top-width: 1px;
-  border-color: #ccc;
-  background-color: #000;
+  background-color: #777;
 `
 
 export const ModalButton = styled.TouchableOpacity`
@@ -68,7 +68,7 @@ export const ModalButton = styled.TouchableOpacity`
   padding: 10px;
   z-index: 2;
   background-color: #ddd;
-  border-color: #ccc;
+  border-color: #bbb;
 `
 
 export const ModalButtonText = styled.Text`

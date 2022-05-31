@@ -8,24 +8,20 @@ import i18n from 'i18n-js'
 import Recording from './components/Recording'
 import Header from './components/Header'
 import ControlPanel from './components/ControlPanel'
-import { initialRecordings } from './helpers'
-import { useRecordingState, getRecordingsAsync, storeRecordingsAsync } from './RecordingContext'
+import { useRecordingState, getRecordingsAsync } from './RecordingContext'
 
 const Home = () => {
   const [{ recordings, recording }, dispatch] = useRecordingState()
   const [filteredRecs, setFilteredRecs] = useState(recordings)
   const [searchTerm, setSearchTerm] = useState('')
-  const [searching, setSearching] = useState(false)
   const searchInput = useRef(null)
   
   useEffect(() => {
-    //getRecordings()
-    storeRecordingsAsync(initialRecordings)
-    dispatch({ type: 'SET_RECORDINGS', payload: initialRecordings })
-
+    getRecordings()
   }, [])
 
   useEffect(() => {
+    dispatch({ type: 'SET_ACTIVE_RECORDING', payload: null })
     filterRecordings(searchTerm)
   }, [recordings, searchTerm])
 
@@ -43,7 +39,6 @@ const Home = () => {
   }
 
   const clearSearch = () => {
-    Keyboard.dismiss()
     setSearchTerm('')
     searchInput.current.blur()
     searchInput.current.clear()
@@ -57,7 +52,7 @@ const Home = () => {
         barStyle="light-content"
         />
         <DarkAreaView pointerEvents={recording ? 'none' : 'auto'}>
-        <Gradient />
+          <Gradient />
           <ScrollView 
             overScrollMode='never' 
             keyboardShouldPersistTaps='handled'
@@ -67,17 +62,15 @@ const Home = () => {
               contentContainerStyle={{ justifyContent: 'center' }} 
               keyboardShouldPersistTaps='handled'
             >
-            <SearchInput
-              ref={searchInput}
-              onChangeText={setSearchTerm}
-              onFocus={() => setSearching(true)}
-              onBlur={() => setSearching(false)}
-              selectionColor={'#2159ca'}
-              spellCheck={false}
-              autoCorrect={false}
-              placeholder={i18n.t('search')}
-              placeholderTextColor="#666" 
-            />
+              <SearchInput
+                ref={searchInput}
+                onChangeText={setSearchTerm}
+                selectionColor={'#2159ca'}
+                spellCheck={false}
+                autoCorrect={false}
+                placeholder={i18n.t('search')}
+                placeholderTextColor="#666" 
+              />
               <SearchIcon />
               {searchTerm.length > 0 && (
                 <SearchCancelButton onPress={clearSearch}>
@@ -98,8 +91,7 @@ const Home = () => {
             </ScrollView>
           </ScrollView>
         </DarkAreaView>
-        <ControlPanel
-        />
+        <ControlPanel/>
     </View>
   )
 }

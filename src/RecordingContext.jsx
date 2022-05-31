@@ -1,8 +1,8 @@
 import { createContext, useContext, useReducer } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-export const RecoringStateCTX = createContext()
-export const useRecordingState = () => useContext(RecoringStateCTX)
+const RecordingStateCTX = createContext()
+export const useRecordingState = () => useContext(RecordingStateCTX)
 
 const initialState = {
   recordings: [],
@@ -23,18 +23,23 @@ const recordingStateReducer = (state, action) => {
     case 'SET_ACTIVE_RECORDING':
       const activeRecording = action.payload
       return {...state, activeRecording}
-    }
+
+    default:
+      console.error('error in recording reducer', err)
+  }
 }
 
 const RecordingStateProvider = ({ children }) => {
   const [state, dispatch] = useReducer(recordingStateReducer, initialState)
 
   return (
-      <RecoringStateCTX.Provider value={[state, dispatch]}>
+      <RecordingStateCTX.Provider value={[state, dispatch]}>
         {children}
-      </RecoringStateCTX.Provider>
+      </RecordingStateCTX.Provider>
   )
 }
+
+export default RecordingStateProvider
 
 export const getRecordingsAsync = async () => {
   let recordings = []
@@ -45,7 +50,7 @@ export const getRecordingsAsync = async () => {
       recordings = await JSON.parse(payload)
     }
   } catch (err) {
-    console.log('get recordings from async storage error: ', err)
+    console.error('get recordings from async storage error: ', err)
   }
 
   return recordings
@@ -56,8 +61,6 @@ export const storeRecordingsAsync = async recordings => {
     const payload = JSON.stringify(recordings)
     await AsyncStorage.setItem('recordings', payload)
   } catch (err) {
-    console.log('store recordings in async storage error: ', err)
+    console.error('store recordings in async storage error: ', err)
   }
 }
-
-export default RecordingStateProvider
