@@ -38,6 +38,11 @@ const Home = () => {
     }))
   }
 
+  const handleSearch = text => {
+    setSearchTerm(text)
+    dispatch({ type: 'SET_ACTIVE_RECORDING', payload: null })
+  }
+
   const clearSearch = () => {
     setSearchTerm('')
     searchInput.current.blur()
@@ -64,7 +69,7 @@ const Home = () => {
             >
               <SearchInput
                 ref={searchInput}
-                onChangeText={setSearchTerm}
+                onChangeText={handleSearch}
                 selectionColor={'#2159ca'}
                 spellCheck={false}
                 autoCorrect={false}
